@@ -1,0 +1,87 @@
+{% extends 'index.html' %}
+{% block title%}<title>Custome Care! </title> {% endblock %}
+{% block content %}
+{% load static %}   
+  
+<!-- BEGIN #product -->
+<div id="product" class="section-container p-t-20">
+    <!-- BEGIN container -->
+    <div class="container">
+        <!-- BEGIN breadcrumb -->
+        <ul class="breadcrumb m-b-10 f-s-12">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Support</a></li>
+            <li class="active">Contact Us</li>
+        </ul>
+        <!-- END breadcrumb -->
+        <!-- BEGIN row -->
+        <div class="row row-space-30">
+            <!-- BEGIN col-8 -->
+            <div class="col-md-8">
+                <h4 class="m-t-0">Get in Touch</h4>
+                <p class="m-b-30 f-s-13">
+                    We'd love to hear from you! Fill out the form below and we'll get back to you as soon as possible.
+                </p>
+
+                {% include 'alert.html' %}
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label class="control-label">Your Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name" />
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Your Email <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="email" />
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Subject <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="subject" />
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Your Message <span class="text-danger">*</span></label>
+                        <textarea class="form-control" rows="5" name="message"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </div>
+                </form>
+            </div>
+            <!-- END col-8 -->
+            <!-- BEGIN col-4 -->
+            <div class="col-md-4">
+                <h4 class="m-t-0">Our Contacts</h4>
+                <p>
+                    Feel free to reach out to us via any of the following means:
+                </p>
+                <address>
+                    <strong>E-tech Shop, Inc</strong><br>
+                   19 Treade Center, Street 12-b<br>
+                   Bahawalpur<br>
+                    P: (92) 326-326487215
+                </address>
+                <p>
+                    <strong>Email:</strong><br>
+                    <a href="mailto:info@seantheme.com" class="text-primary">rzxgraphics@gmail.com</a><br>
+                    <a href="mailto:business@seantheme.com" class="text-primary">business@seantheme.com</a><br>
+                    <a href="mailto:support@seantheme.com" class="text-primary">support@seantheme.com</a>
+                </p>
+                <p>
+                    <strong>Social Network:</strong><br>
+                    <a href="https://www.facebook.com/StudywithAyaz" class="btn btn-icon btn-facebook"><i class="fa fa-facebook"></i></a>
+                    <a href="https://twitter.com/cgpa2pointzero" class="btn btn-icon btn-twitter"><i class="fa fa-twitter"></i></a>
+                    <a href="https://www.youtube.com/@studywithayaz" class="btn btn-icon btn-google"><i class="fa fa-google-plus"></i></a>
+                    <a href="https://www.instagram.com/study_withayaz" class="btn btn-icon btn-instagram"><i class="fa fa-instagram"></i></a>
+                   
+                </p>
+            </div>
+            <!-- END col-4 -->
+        </div>
+        <!-- END row -->
+    </div>
+    <!-- END container -->
+</div>
+<!-- END #product -->
+{% endblock %}

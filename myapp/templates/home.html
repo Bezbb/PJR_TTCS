@@ -1,0 +1,174 @@
+{% extends 'index.html' %}
+    {% block content %}
+        {% load static %}   
+        {% load humanize %}
+    
+        <!-- BEGIN #slider -->
+        <div id="slider" class="section-container p-0 bg-black-darker">
+            <!-- BEGIN carousel -->
+            <div id="main-carousel" class="carousel slide" data-ride="carousel">
+                <!-- BEGIN carousel-inner -->
+                <div class="carousel-inner"> 
+                    <!-- BEGIN item -->
+                    <div class="item active">
+                        <img src="{% static '' %}" class="bg-cover-img" alt="" />
+                        <div class="container">
+                            <img src="{% static '' %}" class="product-img right bottom fadeInRight animated" alt="" />
+                        </div>
+                        <div class="carousel-caption carousel-caption-left">
+                            <div class="container">
+                                <h3 class="title m-b-5 fadeInLeftBig animated">Banner1</h3> 
+                                <div class="price m-b-30 fadeInLeftBig animated"><small>from</small> <span></span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <img src="{% static '' %}" class="bg-cover-img" alt="" />
+                        <div class="container">
+                            <img src="{% static '' %}" class="product-img left bottom fadeInLeft animated" alt="" />
+                        </div>
+                        <div class="carousel-caption carousel-caption-right">
+                            <div class="container">
+                                <h3 class="title m-b-5 fadeInRightBig animated">Banner2</h3> 
+                                <div class="price m-b-30 fadeInRightBig animated"><small>from</small> <span></span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END item -->
+                    <!-- BEGIN item -->
+                    <div class="item">
+                        <img src="{% static '' %}" class="bg-cover-img" alt="" />
+                        <div class="carousel-caption">
+                            <div class="container">
+                                <h3 class="title m-b-5 fadeInDownBig animated">Banner3</h3> 
+                                <div class="price fadeInDownBig animated"><small>from</small> <span></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a class="left carousel-control" href="#main-carousel" data-slide="prev"> 
+                    <i class="fa fa-angle-left"></i> 
+                </a>
+                <a class="right carousel-control" href="#main-carousel" data-slide="next">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+        </div>
+        <div id="trending-items" class="section-container bg-silver">
+            <!-- BEGIN container -->
+            <div class="container">
+                <!-- BEGIN section-title -->
+                <h4 class="section-title clearfix">
+                    
+                    Sản phẩm thịnh hành
+                </h4>
+                <!-- END section-title -->
+                
+                <!-- BEGIN row -->
+                <div class="row row-space-10">
+                    {% for p in trending_products %}
+                    {% if p.is_trending %}
+                        <!-- BEGIN col-2 -->
+                        <div class="col-md-2 col-sm-4">
+                            <!-- BEGIN item -->                    
+                            <div class="item item-thumbnail">
+                                <a href="{% url 'product_detail' p.slug %}" class="item-image">
+                                    <img src="media/{{ p.product_image }}" alt="" />
+                                    <div class="discount">{{ p.discount_percentage }}% OFF</div>
+                                </a>
+                                <div class="item-info">
+
+                                    <h4 class="item-title">
+                                        <a href="{% url 'product_detail' p.slug %}">{{ p.product_name }}<br /></a>
+                                    </h4>
+
+                                    <p class="item-desc">{{ p.product_description }}.</p>
+                                    <div class="item-price">{{ p.discounted_price|intcomma }} đ</div>
+                                    <div class="item-discount-price">{{ p.orignal_price|intcomma }} đ</div>
+                                </div>           
+                            </div>
+                            <!-- END item -->
+                        </div>
+                        <!-- END col-2 -->
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <!-- END row -->
+    
+            </div>
+            <!-- END container -->
+        </div>
+        <!-- END #trending-items -->
+    
+
+ <!-- BEGIN laptop-list -->
+<div id="laptop-list" class="section-container bg-silver p-t-0">
+    <!-- BEGIN container -->
+    <div class="container">
+        <!-- BEGIN section-title -->
+        <h4 class="section-title clearfix">
+            Laptops
+            <a href="{% url 'laptops' %}" class="pull-right">Xem thêm</a>
+        </h4>
+        <!-- END section-title -->
+        
+        <!-- BEGIN category-container -->
+        <div class="category-container">
+            <!-- BEGIN category-sidebar -->
+            <div class="category-sidebar">
+                <ul class="category-list">
+                    <li class="list-header">Thương hiệu nổi bật</li>
+
+                    {% for brand in laptop_companies %}
+                    <li><a href="{% url 'product_by_company_laptops' company_name=brand %}">{{ brand }}</a></li>
+                    {% endfor %}
+
+                </ul>
+            </div>
+            
+            <!-- END category-sidebar -->
+
+            <!-- BEGIN category-detail -->
+            <div class="category-detail">
+                <!-- BEGIN category-item -->
+                <!-- END category-item -->
+
+                <!-- BEGIN category-item -->
+                <div class="category-item list">
+                    <!-- BEGIN item-row -->
+                    <div class="item-row">
+                        {% for laptop in laptops %}
+                            {% if laptop.category.category == 'Laptops' %}
+                                <!-- BEGIN item -->
+                                <div class="item item-thumbnail">
+                                    <a href="{% url 'product_detail' laptop.slug %}" class="item-image">
+                                        <img src="media/{{ laptop.product_image }}" alt="" />
+                                        <div class="discount">{{ laptop.discount_percentage }} %off</div>
+                                    </a>
+                                    <div class="item-info">
+                                        <h4 class="item-title">
+                                            <a href="{% url 'product_detail' laptop.slug %}">{{ laptop.product_name }}<br /></a>
+                                        </h4>
+                                        <p class="item-desc">{{ laptop.product_description }}.</p>
+                                        <div class="item-price">{{ laptop.discounted_price|intcomma }} đ</div>
+                                        <div class="item-discount-price">{{ laptop.orignal_price|intcomma }} đ</div>
+                                    </div>
+                                </div>
+                                <!-- END item -->
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <!-- END item-row -->
+                </div>
+                <!-- END category-item -->
+            </div>
+            <!-- END category-detail -->
+        </div>
+        <!-- END category-container -->
+    </div>
+    <!-- END container -->
+</div>
+
+<!-- END Laptop-list -->
+
+    {% endblock %}

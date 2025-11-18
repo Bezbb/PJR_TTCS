@@ -1,0 +1,297 @@
+{% extends 'index.html' %}
+
+{% block title%}
+<title>{{product.product_name}}</title>
+{% endblock %}
+
+{% block content %}
+
+{% load static %}
+{% load humanize %}
+
+
+<!-- BEGIN #product -->
+<div id="product" class="section-container p-t-20">
+  <!-- BEGIN container -->
+  <div class="container">
+
+    <!-- BEGIN product -->
+    <div class="product">
+      <!-- BEGIN product-detail -->
+      <div class="product-detail">
+        <!-- BEGIN product-image -->
+        <div class="product-image">
+          <!-- BEGIN product-thumbnail -->
+          <div class="product-thumbnail">
+            <ul class="product-thumbnail-list">
+              {% for feature_images in product.feature_product_images.all %}
+              <li>
+                <a href="#" data-click="show-main-image" data-url="{{feature_images.image.url}}">
+                  <img src="{{feature_images.image.url}}" alt="No" />
+                </a>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+          <!-- END product-thumbnail -->
+
+          <!-- BEGIN product-main-image -->
+          <div class="product-main-image" data-id="main-image">
+            <img src="{{product.product_image.url}}" alt="Nothing" />
+          </div>
+          <!-- END product-main-image -->
+        </div>
+        <!-- END product-image -->
+
+        <!-- BEGIN product-info -->
+        <div class="product-info">
+          <!-- BEGIN product-info-header -->
+          <div class="product-info-header">
+            <h1 class="product-title">
+              <span class="label label-success">{{product.discount_percentage}} % OFF</span>
+              {{product.product_name}}
+            </h1>
+          </div>
+          <!-- END product-info-header -->
+
+          <!-- BEGIN product-warranty -->
+          <div class="product-warranty">
+            {% if product.is_stock %}
+            <div class="pull-right">Tình trạng: <b>Còn hàng</b></div>
+            {% else %}
+            <div class="pull-right">Tình trạng: <b>Hết hàng</b></div>
+            {% endif %}
+            <div>
+              <b>{{product.warranty}} Năm</b> Bảo hành của nhà sản xuất
+            </div>
+          </div>
+          <!-- END product-warranty -->
+
+          <!-- BEGIN product-info-list -->
+          <ul class="product-info-list">
+            <li>
+              {{product.product_description}}
+            </li>
+          </ul>
+          <!-- END product-info-list -->
+
+          <!-- BEGIN product-purchase-container -->
+<!-- BEGIN product-purchase-container -->
+<div class="product-purchase-container">
+  <div class="product-discount">
+    {# Giá gốc, giống home: có intcomma #}
+    <span class="discount">
+      {{ product.orignal_price|intcomma }} đ
+    </span>
+  </div>
+
+  <div class="product-price">
+    {# Giá giảm, giống home: có intcomma #}
+    <div class="price">
+      {{ product.discounted_price|intcomma }} đ
+    </div>
+  </div>
+
+  <a href="{% url 'checkout_cart' product.slug %}" class="btn btn-inverse btn-lg" type="submit">
+    Thêm vào giỏ hàng
+  </a>
+</div>
+<!-- END product-purchase-container -->
+
+          <!-- END product-purchase-container -->
+        </div>
+        <!-- END product-info -->
+      </div>
+      <!-- END product-detail -->
+
+      <!-- BEGIN product-tab -->
+      <div class="product-tab">
+        <!-- BEGIN #product-tab -->
+        <ul id="product-tab" class="nav nav-tabs">
+          <li class="active">
+            <a href="#product-desc" data-toggle="tab">Mô tả sản phẩm</a>
+          </li>
+          <li class="">
+            <a href="#product-reviews" data-toggle="tab">Đánh giá & Nhận xét ({{review_count}})</a>
+          </li>
+        </ul>
+        <!-- END #product-tab -->
+
+        <!-- BEGIN #product-tab-content -->
+        <div id="product-tab-content" class="tab-content">
+          <!-- BEGIN #product-desc -->
+          <div class="tab-pane fade active in" id="product-desc">
+            {% for product_desc in product_description %}
+            <div class="product-desc{% if forloop.counter|divisibleby:2 %} right{% endif %}">
+              <div class="image">
+                <img src="{{ product_desc.product_image.url }}" alt="" />
+              </div>
+              <div class="desc">
+                <h4>{{ product_desc.feature }}</h4>
+                <p>{{ product_desc.product_description }}</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <!-- END #product-desc -->
+
+          <!-- BEGIN #product-info -->
+          <div class="tab-pane fade" id="product-info">
+            <div class="table-responsive">
+              <table class="table table-product table-striped">
+                <thead>
+                  <tr>
+                    <th>Features</th>
+                    <th>{{ product.product_name }}</th>
+                    <th>{{ new_product_name }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for info in information.all %}
+                  <tr>
+                    <td>{{ info.feature }}</td>
+                    <td>{{ info.exisiting_product_description1 }}</td>
+                    <td>{{ info.new_product_description }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <!-- END #product-info -->
+
+          <!-- BEGIN #product-reviews -->
+          <div class="tab-pane fade" id="product-reviews">
+            <div class="row row-space-30">
+              <!-- BEGIN col-7: danh sách review -->
+              <div class="col-md-7">
+                {% for review in reviews %}
+                <div class="review">
+                  <div class="review-info">
+                    <div class="review-rate">
+                      <ul class="review-star">
+                        {# Hiển thị 5 sao, sao đầy dựa trên review.rating #}
+                        {% for i in "12345"|make_list %}
+                          {% if forloop.counter <= review.rating %}
+                          <li class="active"><i class="fa fa-star"></i></li>
+                          {% else %}
+                          <li><i class="fa fa-star-o"></i></li>
+                          {% endif %}
+                        {% endfor %}
+                      </ul>
+                    </div>
+                    <div class="review-author">
+                      <strong>{{ review.name }}</strong>
+                      {% if review.created_at %}
+                      <span class="text-muted"> - {{ review.created_at|date:"d/m/Y H:i" }}</span>
+                      {% endif %}
+                    </div>
+                    <div class="review-content">
+                      <p>{{ review.message }}</p>
+                    </div>
+                  </div>
+                </div>
+                {% empty %}
+                <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+                {% endfor %}
+
+                {% include 'review-paginator.html' %}
+              </div>
+              <!-- END col-7 -->
+
+              <!-- BEGIN col-5: form viết review -->
+              <div class="col-md-5">
+                <div class="review-form">
+                  <form action="{% url 'product_detail' product.slug %}" name="review_form" method="post">
+                    {% csrf_token %}
+                    <h2>Write a review</h2>
+                    <div class="form-group">
+                      <label for="name">Name <span class="text-danger">*</span></label>
+                      <input type="text" name="name" required class="form-control" id="name" />
+                    </div>
+                    <div class="form-group">
+                      <label for="email">Email <span class="text-danger">*</span></label>
+                      <input type="email" name="email" required class="form-control" id="email" />
+                    </div>
+                    <div class="form-group">
+                      <label for="review">Review <span class="text-danger">*</span></label>
+                      <textarea class="form-control" required name="message" rows="8" id="review"></textarea>
+                    </div>
+
+                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+                    <div class="form-group">
+                      <label for="email">Rating <span class="text-danger">*</span></label>
+                      <div class="rating rating-selection" data-rating="true" data-target="rating">
+                        <i class="fa fa-star-o" data-value="1"></i>
+                        <i class="fa fa-star-o" data-value="2"></i>
+                        <i class="fa fa-star-o" data-value="3"></i>
+                        <i class="fa fa-star-o" data-value="4"></i>
+                        <i class="fa fa-star-o" data-value="5"></i>
+                      </div>
+                      <input type="hidden" name="rating" id="rating" value="">
+                    </div>
+
+                    <div class="form-group text-center">
+                      <button type="submit" class="btn btn-inverse btn-lg">Submit Review</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <!-- END col-5 -->
+            </div>
+            <!-- END row -->
+          </div>
+          <!-- END #product-reviews -->
+        </div>
+        <!-- END #product-tab-content -->
+      </div>
+      <!-- END product-tab -->
+    </div>
+    <!-- END product -->
+
+    <!-- BEGIN similar-product -->
+    <center>
+      <h2>Những sản phẩm khác</h2>
+    </center>
+    <br>
+    <div class="row row-space-10">
+      {% for p in random_products %}
+      <div class="col-md-2 col-sm-6">
+        <div class="item item-thumbnail">
+          <a href="{% url 'product_detail' p.slug %}" class="item-image">
+            <img src="{{p.product_image.url}}" alt="" />
+            <div class="discount">{{p.discount_percentage}} %OFF</div>
+          </a>
+
+          <div class="item-info">
+            <h4 class="item-title">
+              <a href="{% url 'product_detail' p.slug %}">{{p.product_name}}<br /></a>
+            </h4>
+            <p class="item-desc">{{p.product_description}}.</p>
+            <div class="item-price">{{p.discounted_price}} đ</div>
+            <div class="item-discount-price">{{p.orignal_price}} đ</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <hr>
+    <!-- END similar-product -->
+  </div>
+  <!-- END container -->
+</div>
+<!-- END #product -->
+
+<script>
+  $(document).ready(function() {
+    $('.rating i').click(function() {
+      var value = $(this).data('value');
+      $('.rating i').removeClass('fa-star').addClass('fa-star-o');
+      $(this).prevAll().addBack().removeClass('fa-star-o').addClass('fa-star');
+      $('#rating').val(value);
+    });
+  });
+</script>
+
+{% endblock %}

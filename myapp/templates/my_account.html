@@ -1,0 +1,52 @@
+{% extends 'index.html' %}
+{% block content %}
+{% load static %}        
+{% load humanize %}
+
+<div class="container mt">
+    <div class="container">
+        <ul class="breadcrumb m-b-10 f-s-14 bg-light p-3 rounded shadow-sm">
+            <li><a href="/">Home</a></li>
+            <li class="active">My Account</li>
+        </ul>
+
+        <div class="account-container shadow-sm p-5 mb-5 bg-white rounded">
+            <div class="account-body">
+                <h4 class="mb-4 text-center"><i class="fa fa-gitlab fa-fw text-muted"></i> Recent Order</h4>
+                
+                <table class="table table-bordered table-striped table-hover table-responsive-md text-center">
+                    <thead class="thead-light">
+                        <tr>
+                            <th class="align-middle">Product Name</th>
+                            <th class="align-middle">Quantity</th>
+                            <th class="align-middle">Total Price</th>
+                            <th class="align-middle">Tracking ID</th>
+                            <th class="align-middle">Order Placed Date</th>
+                            <th class="align-middle">Delivery Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if order %}
+                            {% for ordered_item in order %}
+                                <tr>
+                                    <td class="align-middle">{{ ordered_item.product.product_name }}</td>
+                                    <td class="align-middle">{{ ordered_item.quantity }}</td>
+                                    <td class="align-middle">{{ ordered_item.total_price|floatformat:"2"|intcomma }}</td>
+                                    <td class="align-middle">{{ ordered_item.order_id }}</td>
+                                    <td class="align-middle">{{ ordered_item.created_at|date:"F j, Y" }}</td>
+                                    <td class="align-middle">{{ delivery_date|date:"F j, Y" }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center">No recent orders found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'index.html' %}
+{% block content %}
+{% load static %}
+
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+  <div class="col-12 col-md-8 col-lg-6">
+    <form class="card p-5 border-0 shadow-lg rounded-4" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <h2 class="text-center mb-4 fw-bold text-info">Đăng nhập</h2>
+      <hr class="mb-4">
+
+      {% if messages %}
+      <div class="alert alert-success alert-dismissible fade show rounded-3" role="alert">
+        {% for message in messages %}
+        {{ message }}
+        {% endfor %}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endif %}
+
+      <div class="mb-4">
+        <label for="email" class="form-label fw-semibold">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          class="form-control form-control-lg rounded-pill" 
+          placeholder="Nhập email của bạn" 
+          required
+        >
+      </div>
+
+      <div class="mb-4">
+        <label for="password" class="form-label fw-semibold">Mật khẩu</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          class="form-control form-control-lg rounded-pill" 
+          placeholder="Nhập mật khẩu" 
+          required
+        >
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <p class="mb-0">Chưa có tài khoản? 
+          <a href="{% url 'register' %}" class="text-info">Đăng ký</a>
+        </p>
+        <p class="mb-0"><strong>Quên mật khẩu?</strong> 
+          <a href="{% url 'forget_password' %}" class="text-info">Khôi phục</a>
+        </p>
+      </div>
+
+      <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+      <button 
+        type="submit" 
+        class="btn btn-info w-100 py-2 rounded-pill fw-semibold text-white"
+      >
+        Đăng nhập
+      </button>
+      
+      <div class="text-center mt-3">
+        <div class="d-flex justify-content-center">
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

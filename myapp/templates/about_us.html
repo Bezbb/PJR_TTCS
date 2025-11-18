@@ -1,0 +1,131 @@
+{% extends 'index.html' %}
+
+{% block content %}
+{% load static %} 
+        
+<!-- BEGIN #about-us-cover -->
+<div id="about-us-cover" class="has-bg section-container">
+    <!-- BEGIN cover-bg -->
+    <div class="cover-bg">
+        <img src="{% static 'assets/img/about-us-cover.jpg' %}" alt="Ảnh bìa giới thiệu" />
+    </div>
+    <!-- END cover-bg -->
+
+    <!-- BEGIN container -->
+    <div class="container">
+
+        <!-- BEGIN about-us -->
+        <div class="about-us text-center">
+            <h1>Về E-Tech Shop</h1>
+            <p>
+                Chúng tôi mang đến các sản phẩm công nghệ chính hãng, giá tốt cùng dịch vụ giao hàng nhanh
+                và hỗ trợ tận tâm. Sứ mệnh của chúng tôi là giúp bạn chọn được sản phẩm phù hợp nhất.
+            </p>
+        </div>
+        <!-- END about-us -->
+    </div>
+    <!-- END container -->
+</div>
+<!-- END #about-us-cover -->
+        
+<!-- BEGIN #about-us-content -->
+<div id="about-us-content" class="section-container bg-white">
+    <!-- BEGIN container -->
+    <div class="container">
+        <!-- BEGIN about-us-content -->
+        <div class="about-us-content">
+            <h2 class="title text-center">Chúng tôi làm gì?</h2>
+            <p class="desc text-center">
+                Tập trung vào trải nghiệm mua sắm mượt mà, giao hàng đúng hẹn và hậu mãi rõ ràng.<br />
+                Luôn lắng nghe để không ngừng hoàn thiện dịch vụ.
+            </p>
+            
+            <!-- BEGIN row -->
+            <div class="row">
+                <!-- begin col-4 -->
+                <div class="col-md-4 col-sm-4">
+                    <div class="service">
+                        <div class="icon text-muted"><i class="fa fa-truck"></i></div>
+                        <div class="info">
+                            <h4 class="title">Giao hàng nhanh</h4>
+                            <p class="desc">Vận chuyển linh hoạt, theo dõi đơn hàng thời gian thực, đảm bảo đúng hẹn.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- end col-4 -->
+
+                <!-- begin col-4 -->
+                <div class="col-md-4 col-sm-4">
+                    <div class="service">
+                        <div class="icon text-primary"><i class="fa fa-universal-access"></i></div>
+                        <div class="info">
+                            <h4 class="title">Trải nghiệm thân thiện</h4>
+                            <p class="desc">Giao diện dễ dùng, hỗ trợ tư vấn 1-1 giúp bạn chọn đúng sản phẩm.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- end col-4 -->
+
+                <!-- begin col-4 -->
+                <div class="col-md-4 col-sm-4">
+                    <div class="service">
+                        <div class="icon text-info"><i class="fa fa-assistive-listening-systems"></i></div>
+                        <div class="info">
+                            <h4 class="title">Hỗ trợ tận tâm</h4>
+                            <p class="desc">Đội ngũ CSKH luôn sẵn sàng hỗ trợ trước – trong – sau mua.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- end col-4 -->
+            </div>
+            <!-- END row -->
+
+            <hr />
+
+            <!-- BEGIN row -->
+            <div class="row">
+                <!-- begin col-4 -->
+                <div class="col-md-4 col-sm-4">
+                    <div class="service">
+                        <div class="icon text-danger"><i class="fa fa-cc-discover"></i></div>
+                        <div class="info">
+                            <h4 class="title">Thanh toán linh hoạt</h4>
+                            <p class="desc">Nhiều phương thức thanh toán an toàn, rõ ràng chi phí.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- end col-4 -->
+
+                <!-- begin col-4 -->
+                <div class="col-md-4 col-sm-4">
+                    <div class="service">
+                        <div class="icon text-inverse"><i class="fa fa-connectdevelop"></i></div>
+                        <div class="info">
+                            <h4 class="title">Sản phẩm chính hãng</h4>
+                            <p class="desc">Hợp tác cùng các thương hiệu uy tín, bảo hành đầy đủ theo quy định.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- end col-4 -->
+
+                <!-- begin col-4 -->
+                <div class="col-md-4 col-sm-4">
+                    <div class="service">
+                        <div class="icon text-success"><i class="fa fa-braille"></i></div>
+                        <div class="info">
+                            <h4 class="title">Không ngừng cải tiến</h4>
+                            <p class="desc">Liên tục tối ưu quy trình để mang đến trải nghiệm tốt hơn mỗi ngày.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- end col-4 -->
+            </div>
+            <!-- END row -->
+        </div>
+        <!-- END about-us-content -->
+    </div>
+    <!-- END container -->
+</div>
+<!-- END #about-us-content -->
+        
+{% endblock %}

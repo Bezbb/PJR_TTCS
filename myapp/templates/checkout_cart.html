@@ -1,0 +1,182 @@
+{% extends 'index.html' %}
+
+{% block content %}
+{% load static %}
+{% load humanize %}
+
+<!-- BẮT ĐẦU #checkout-cart -->
+<div class="section-container" id="checkout-cart">
+    <!-- BẮT ĐẦU container -->
+    <div class="container">
+        <!-- BẮT ĐẦU checkout -->
+        <div class="checkout">
+            <form action="{% url 'add_to_cart' %}" method="post" id="cart-form">
+                {% csrf_token %}
+                <div class="checkout-header">
+                    <!-- BẮT ĐẦU hàng -->
+                    <div class="row">
+                        <!-- BẮT ĐẦU cột-3 -->
+                        <div class="col-md-3 col-sm-3">
+                            <div class="step active">
+                                <a href="#">
+                                    <div class="number">1</div>
+                                    <div class="info">
+                                        <div class="title">Giao hàng miễn phí</div>
+                                        <div class="desc">Tận hưởng giao hàng miễn phí trên toàn quốc. Không yêu cầu giá trị đơn hàng tối thiểu.</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- KẾT THÚC cột-3 -->
+
+                        <!-- BẮT ĐẦU cột-3 -->
+                        <div class="col-md-3 col-sm-3">
+                            <div class="step">
+                                <a href="{% if cart_items %}{% url 'checkout_info' %}{% else %}#{% endif %}">
+                                    <div class="number">2</div>
+                                    <div class="info">
+                                        <div class="title">Địa chỉ giao hàng</div>
+                                        <div class="desc">Cung cấp địa chỉ giao hàng để chúng tôi có thể giao đơn của bạn một cách an toàn.</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- KẾT THÚC cột-3 -->
+
+                        <!-- BẮT ĐẦU cột-3 -->
+                        <div class="col-md-3 col-sm-3">
+                            <div class="step">
+                                <a href="{% if cart_items %}{% url 'checkout_payment' %}{% else %}#{% endif %}">
+                                    <div class="number">3</div>
+                                    <div class="info">
+                                        <div class="title">Thanh toán</div>
+                                        <div class="desc">Chọn phương thức thanh toán ưa thích để hoàn tất đơn hàng.</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- KẾT THÚC cột-3 -->
+
+                        <!-- BẮT ĐẦU cột-3 -->
+                        <div class="col-md-3 col-sm-3">
+                            <div class="step">
+                                <a href="{% if cart_items %}{% url 'checkout_complete' %}{% else %}#{% endif %}">
+                                    <div class="number">4</div>
+                                    <div class="info">
+                                        <div class="title">Hoàn tất thanh toán</div>
+                                        <div class="desc">Xem lại chi tiết đơn hàng và hoàn tất quá trình thanh toán.</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- KẾT THÚC cột-3 -->
+                    </div>
+                    <!-- KẾT THÚC hàng -->
+                </div>
+                <!-- KẾT THÚC checkout-header -->
+
+                <!-- BẮT ĐẦU checkout-body -->
+                <div class="checkout-body">
+                    <div class="table-responsive">
+                        <table class="table table-cart">
+                            <thead>
+                                <tr>
+                                    <th>Tên sản phẩm</th>
+                                    <th class="text-center">Giá gốc</th>
+                                    <th class="text-center">Số lượng</th>
+                                    <th class="text-center">Tổng cộng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cart_item in cart_items %}
+                                <tr>
+                                    <td class="cart-product">
+                                        <div class="product-details">
+                                            <img src="{{ cart_item.product.product_image.url }}" alt="{{ cart_item.product.product_name }}" class="product-img">
+                                            <div class="product-info">
+                                                <div class="product-name">{{ cart_item.product.product_name }}</div>
+                                                <div class="delivery-date">
+                                                    Ngày giao dự kiến - <b>{{ delivery_date|date:"F j, Y" }}</b>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td class="cart-price">
+                                        <div class="price-tag">
+                                            {{ cart_item.product.orignal_price|intcomma }} - mỗi sản phẩm
+                                        </div>
+                                    </td>
+
+                                    <td class="cart-qty">
+                                        <form method="post" action="{% url 'add_to_cart' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="cart_item_id" value="{{ cart_item.id }}">
+
+                                            <div class="quantity-control">
+                                                <button type="submit" name="action" value="decrease" class="quantity-btn">-</button>
+                                                <span class="quantity">{{ cart_item.quantity }}</span>
+                                                <button type="submit" name="action" value="increase" class="quantity-btn">+</button>
+                                            </div>
+                                        </form>
+                                    </td>
+
+                                    <td class="cart-total"><strong>{{ cart_item.total_price|intcomma }}</strong></td>
+                                </tr>
+                                {% endfor %}
+
+                                <tr>
+                                    <td class="cart-summary" colspan="4">
+                                        <div class="summary-container">
+                                            <div class="summary-row">
+                                                <div class="field">Tổng phụ giỏ hàng</div>
+                                                <div class="value" id="subtotal">
+                                                    ₫{{ subtotal|floatformat:"2"|intcomma }}
+                                                </div>
+                                            </div>
+                                            <div class="summary-row text-danger">
+                                                <div class="field">Miễn phí vận chuyển</div>
+                                                <div class="value">₫0.00</div>
+                                            </div>
+                                            <div class="summary-row total">
+                                                <div class="field">Tổng cộng</div>
+                                                <div class="value" id="total">
+                                                    ₫{{ total|floatformat:"2"|intcomma }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- KẾT THÚC checkout-body -->
+            </form>
+
+            <div class="checkout-footer">
+                <a href="{% url 'product' %}" class="btn btn-white btn-lg pull-left">
+                    Tiếp tục mua sắm
+                </a>
+
+                {% if cart_items %}
+                    <!-- Có sản phẩm thì cho phép thanh toán -->
+                    <a href="{% url 'checkout_info' %}" class="btn btn-inverse btn-lg p-l-30 p-r-30 m-l-10">
+                        Tiến hành thanh toán
+                    </a>
+                {% else %}
+                    <!-- Giỏ hàng trống thì disable -->
+                    <button class="btn btn-inverse btn-lg p-l-30 p-r-30 m-l-10" disabled>
+                        Giỏ hàng trống
+                    </button>
+                {% endif %}
+            </div>
+
+        </div>
+        <!-- KẾT THÚC checkout -->
+    </div>
+    <!-- KẾT THÚC container -->
+</div>
+<!-- KẾT THÚC #checkout-cart -->
+
+{% endblock %}
