@@ -11,14 +11,18 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
 import os
 
+
+load_dotenv()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+print("OPENAI LOADED:", OPENAI_API_KEY)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 SECRET_KEY = 'django-insecure-zuv=k@sr!sohaso=#z++2083(mdz&_9_5282a)l*9l87yk*$&c'
-
 # ================== VNPAY CONFIG ==================
 # TODO: thay bằng thông tin thật lấy trên portal VNPay
 VNPAY_TMN_CODE = '0O9GIIL4'          # Mã website do VNPay cấp
@@ -128,8 +132,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'rzxgraphics@gmail.com'
-EMAIL_HOST_PASSWORD = "cxtp bght dzye zomd"
+EMAIL_HOST_USER = 'gamer2004456@gmail.com'
+EMAIL_HOST_PASSWORD = "wrsg wqag qxym aidc"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/

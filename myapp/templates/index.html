@@ -18,11 +18,15 @@
         <link href="{% static 'assets/css/style-responsive.min.css' %}" rel="stylesheet" />
         <link href="{% static 'assets/css/theme/default.css' %}" id="theme" rel="stylesheet" />
         <link href="{% static 'assets/css/animate.min.css' %}" rel="stylesheet" />
+        <link href="{% static 'assets/css/home.css' %}" rel="stylesheet" />
+        <link href="{% static 'assets/css/chatbox.css' %}" rel="stylesheet" />
+
 
         <!-- ================== END BASE CSS STYLE ================== -->
         
         <!-- ================== BEGIN BASE JS ================== -->
         <script src="{% static 'assets/plugins/pace/pace.min.js' %}"></script>
+
         <!-- ================== END BASE JS ================== -->
     </head>
     {% block css %}
@@ -65,95 +69,100 @@
 
         <!-- BEGIN header-nav -->
         <div class="header-nav">
-            <div class=" collapse navbar-collapse" id="navbar-collapse">
-                <ul class="nav">
-                    <li class="active"><a href="/">Trang chủ</a></li>
-                    <li class="dropdown dropdown-full-width dropdown-hover">
-                        <a href="#" data-toggle="dropdown">
-                            Sản phẩm 
-                            <i class="fa fa-angle-down"></i>
-                            <span class="arrow top"></span>
-                        </a>
+    <div class="collapse navbar-collapse" id="navbar-collapse">
+        <ul class="nav">
 
-                        <!-- BEGIN dropdown-menu -->
-                        <div class="dropdown-menu p-0">
-                            <!-- BEGIN dropdown-menu-container -->
-                            <div class="dropdown-menu-container">
-                                <!-- BEGIN dropdown-menu-sidebar -->
-                                <div class="dropdown-menu-sidebar">
-                                    <h4 class="title">Danh mục</h4>
+            <li class="active">
+                <a href="/">Trang chủ</a>
+            </li>
+
+            <!-- NÚT SẢN PHẨM MỚI THÊM -->
+            <li>
+                <a href="{% url 'product' %}">
+                    Sản phẩm
+                </a>
+            </li>
+            <!-- HẾT MỤC SẢN PHẨM -->
+
+            <li class="dropdown dropdown-full-width dropdown-hover">
+                <a href="#" data-toggle="dropdown">
+                    Danh mục
+                    <i class="fa fa-angle-down"></i>
+                    <span class="arrow top"></span>
+                </a>
+
+                <div class="dropdown-menu p-0">
+                    <div class="dropdown-menu-container">
+
+                        <div class="dropdown-menu-sidebar">
+                            <h4 class="title">Hãng</h4>
+                            <ul class="dropdown-menu-list">
+                                {% for c in categories %}
+                                <li>
+                                    <a href="{% url 'product_by_category' category_id=c.id %}">{{ c.category }}</a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        <div class="dropdown-menu-content">
+                            <h4 class="title">Sản phẩm nổi bật</h4>
+
+                            <div class="row">
+                                {% for item in shuffled_products %}
+                                <div class="col-md-3">
                                     <ul class="dropdown-menu-list">
-                                        {% for c in categories %}
-                                        <li><a href="{% url 'product_by_category' category_id=c.id %}">{{ c.category }}</a></li>
-                                        {% endfor %}
+                                        <li>
+                                            <a href="{% url 'product_detail' item.slug %}">
+                                                <i class="fa fa-fw fa-angle-right text-muted"></i> {{ item.product_name }}
+                                            </a>
+                                        </li>
                                     </ul>
                                 </div>
-                                
-                                <!-- END dropdown-menu-sidebar -->
-
-                                <!-- BEGIN dropdown-menu-content -->
-                                <div class="dropdown-menu-content">
-                                    <h4 class="title">Sản phẩm nổi bật</h4>
-                                  
-                                    <div class="row">
-                                        {% for item in shuffled_products %}
-                                        <div class="col-md-3">
-                                            <ul class="dropdown-menu-list">
-                                                <li><a href="{% url 'product_detail' item.slug %}"><i class="fa fa-fw fa-angle-right text-muted"></i>{{item.product_name}}</a></li>
-                                               
-                                            </ul>
-                                            
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-
-                                </div>
-                            <!-- END dropdown-menu-container -->
+                                {% endfor %}
+                            </div>
                         </div>
-                        <!-- END dropdown-menu -->
-                    </li>
-                   
 
-                    
-                    <li><a href="{% url 'new-arrival' %}">Hàng mới</a></li>
-                    <li class="dropdown dropdown-hover">
-                        <a href="#" data-toggle="dropdown">
-                            Giới thiệu
-                            <i class="fa fa-angle-down"></i> 
-                            <span class="arrow top"></span>
-                        </a>
+                    </div>
+                </div>
+            </li>
 
-                        <ul class="dropdown-menu">
-                            <li><a href="{% url 'product' %}">Sản phẩm</a></li>
-                            <!-- <li><a href="/product-detail">Product Details Page</a></li> -->
-                            <li><a href="/about_us">Chính sách bảo hành</a></li>
-                            <li><a href="/faq">Tư vấn mua hàng</a></li>
-                        </ul>
-                    </li>
+            <li class="dropdown dropdown-hover">
+                <a href="#" data-toggle="dropdown">
+                    Giới thiệu
+                    <i class="fa fa-angle-down"></i>
+                    <span class="arrow top"></span>
+                </a>
 
-                    <li class="dropdown dropdown-hover">
-                        <a href="#" data-toggle="dropdown">
-                            <i class="fa fa-search search-btn"></i>
-                            <span class="arrow top"></span>
-                        </a>
-
-                        <div class="dropdown-menu p-15">
-
-                            <form action="{% url 'home' %}" method="POST">
-                                {% csrf_token %}
-                                <div class="input-group">
-                                    <input type="text" placeholder="Search" name="search" class="form-control bg-silver-lighter"/>
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-inverse" type="submit"><i class="fa fa-search"></i></button>
-                                    </span>
-                                </div>
-                            </form>
-                            
-                        </div> 
-                    </li>
+                <ul class="dropdown-menu">
+                    <li><a href="/about_us">Chính sách bảo hành</a></li>
+                    <li><a href="/faq">Tư vấn mua hàng</a></li>
                 </ul>
-            </div>
-        </div>
+            </li>
+
+            <li class="dropdown dropdown-hover">
+                <a href="#" data-toggle="dropdown">
+                    <i class="fa fa-search search-btn"></i>
+                    <span class="arrow top"></span>
+                </a>
+
+                <div class="dropdown-menu p-15">
+                    <form action="{% url 'home' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" placeholder="Search" name="search" class="form-control bg-silver-lighter" />
+                            <span class="input-group-btn">
+                                <button class="btn btn-inverse" type="submit"><i class="fa fa-search"></i></button>
+                            </span>
+                        </div>
+                    </form>
+                </div> 
+            </li>
+
+        </ul>
+    </div>
+</div>
+
         <!-- END header-nav -->
 
         <!-- BEGIN header-nav -->
@@ -411,5 +420,29 @@
 	        App.init();
 	    });
 	</script>
+    <!-- ================== AI CHATBOX ================== -->
+<div id="ai-chatbox" class="ai-chatbox">
+    <div class="ai-chat-header">
+        <span>Trợ lý AI - Hỗ trợ mua hàng</span>
+        <button id="chatbox-toggle" class="chatbox-toggle">×</button>
+    </div>
+
+    <div id="ai-chat-messages" class="ai-chat-messages"></div>
+
+    <div class="ai-chat-input">
+        <input type="text" id="ai-chat-input-text" placeholder="Nhập câu hỏi..." />
+        <button id="ai-chat-send-btn">Gửi</button>
+    </div>
+</div>
+
+<!-- Nút mở chatbox -->
+<button id="chatbox-open-btn" class="chatbox-open-btn">
+    <i class="fa fa-comments"></i>
+</button>
+<!-- ================== END AI CHATBOX ================== -->
+
+        <script src="{% static 'assets/js/ai_chat.js' %}"></script>
+
+
 </body>
 </html>

@@ -1,0 +1,228 @@
+.hero-simple {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, #0c1b33, #10284c);
+    padding: 40px 60px;
+    border-radius: 10px;
+    color: white;
+    margin-bottom: 0;      /* <--- bỏ khoảng trắng */
+}
+
+.hero-simple .hero-text h1 {
+    font-size: 34px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.hero-simple .hero-text p {
+    font-size: 18px;
+    margin-top: 8px;
+}
+
+.hero-simple .hero-text p span {
+    font-weight: 700;
+    color: #ffdd00;
+}
+
+.hero-simple .hero-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #00aaff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 600;
+}
+
+.hero-simple .hero-btn:hover {
+    background: #0088cc;
+}
+
+.hero-simple .hero-img {
+    width: 350px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+
+/* ===========================
+   CUSTOM PRODUCT CARD - E-TECH
+   =========================== */
+
+/* Card chung cho cả trending + laptop list */
+.item.item-thumbnail.product-card {
+    border-radius: 14px;
+    border: 1px solid #e1e5ea;
+    background: #ffffff;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.04);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hover: nhấc card lên, đổ bóng mạnh hơn */
+.item.item-thumbnail.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 35px rgba(15, 23, 42, 0.18);
+}
+
+/* Vùng ảnh */
+.item.item-thumbnail.product-card .item-image {
+    position: relative;
+    padding: 14px;
+    height: 190px;
+    text-align: center;
+    line-height: 160px;
+    background: #f7f9fc;
+}
+
+/* Ảnh phóng nhẹ khi hover */
+.item.item-thumbnail.product-card .item-image img {
+    max-width: 100%;
+    max-height: 100%;
+    transition: transform 0.25s ease;
+}
+
+.item.item-thumbnail.product-card:hover .item-image img {
+    transform: scale(1.06);
+}
+
+/* Nhãn giảm giá mới */
+/* Badge giảm giá nhỏ */
+.product-badge-discount {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+
+    background: linear-gradient(135deg, #ff7a18, #ff2d55);
+    color: #fff;
+
+    border-radius: 6px;      /* bo góc nhỏ */
+    line-height: normal;
+
+    width: auto;             /* CHỈ ĐOẠN NÀY LÀ QUAN TRỌNG NHẤT */
+    height: auto;            /* CHỈ ĐOẠN NÀY LÀ QUAN TRỌNG NHẤT */
+
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+
+    transform: scale(1);
+    transition: 0.2s ease;
+}
+
+.product-card:hover .product-badge-discount {
+    transform: scale(1.05);
+}
+
+/* Nội dung card */
+.item.item-thumbnail.product-card .item-info {
+    padding: 10px 14px 14px;
+    text-align: center;
+    flex: 1;
+}
+
+/* Tên sản phẩm */
+.item.item-thumbnail.product-card .item-title,
+.item.item-thumbnail.product-card .item-title a {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    color: #222;
+    margin: 0 0 4px;
+    max-height: 40px;
+    overflow: hidden;
+}
+
+.item.item-thumbnail.product-card .item-title a:hover,
+.item.item-thumbnail.product-card .item-title a:focus {
+    color: #009688;
+}
+
+/* Mô tả ngắn */
+.item.item-thumbnail.product-card .item-desc {
+    font-size: 12px;
+    color: #707478;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+}
+
+/* Giá cũ */
+.item.item-thumbnail.product-card .item-discount-price {
+    font-size: 12px;
+    color: #999;
+    text-decoration: line-through;
+    margin-top: 2px;
+}
+
+/* Giá chính */
+.item.item-thumbnail.product-card .item-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: #00acac;
+    margin-top: 2px;
+}
+
+/* Khoảng cách đều hơn cho hàng trending */
+#trending-items .row.row-space-10 > [class*="col-"] {
+    margin-bottom: 24px;
+}
+
+/* Card dạng ngang trong laptop list – giữ layout 3 cột nhưng trông cân hơn */
+.category-item.list .item.item-thumbnail.product-card.product-card-horizontal {
+    border-radius: 12px;
+}
+.chat-product-suggestions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+}
+
+.chat-product-card {
+    display: flex;
+    flex-direction: column;
+    width: 120px;
+    text-decoration: none;
+    background: #fff;
+    padding: 8px;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    transition: 0.2s;
+}
+
+.chat-product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+}
+
+.chat-product-image {
+    width: 100%;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 6px;
+}
+
+.chat-product-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.chat-product-price {
+    font-size: 12px;
+    font-weight: bold;
+    color: #0d8f4e;
+}
+
+

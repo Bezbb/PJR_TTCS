@@ -13,6 +13,8 @@ urlpatterns = [
     path("checkout_complete", views.checkout_complete, name="checkout_complete"),
     path("checkout_info", views.checkout_info, name="checkout_info"),
     path("checkout_payment", views.checkout_payment, name="checkout_payment"),
+    path("buy_now/<slug:slug>/", views.buy_now, name="buy_now"),
+
 
     # Payment
     path("payment-failed", views.payment_failed, name="payment-failed"),
@@ -50,6 +52,6 @@ urlpatterns = [
     path("cancel-order/<int:pid>/", views.cancel_order, name="cancel-order"),
     path("return-order/<int:pid>/", views.return_order, name="return-order"),
 
-    # New arrival
-    path("new-arrival", views.new_arrival, name="new-arrival"),
+    # API
+    path("api/ai-chat/", views.ai_chat, name="ai_chat"),
 ]

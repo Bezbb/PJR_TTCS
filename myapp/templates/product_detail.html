@@ -1,20 +1,15 @@
 {% extends 'index.html' %}
-
 {% block title%}
 <title>{{product.product_name}}</title>
 {% endblock %}
-
 {% block content %}
-
 {% load static %}
 {% load humanize %}
-
 
 <!-- BEGIN #product -->
 <div id="product" class="section-container p-t-20">
   <!-- BEGIN container -->
   <div class="container">
-
     <!-- BEGIN product -->
     <div class="product">
       <!-- BEGIN product-detail -->
@@ -92,9 +87,15 @@
     </div>
   </div>
 
+    <a href="{% url 'buy_now' product.slug %}"
+     class="btn btn-warning btn-lg">
+    Mua ngay
+  </a>
+
   <a href="{% url 'checkout_cart' product.slug %}" class="btn btn-inverse btn-lg" type="submit">
     Thêm vào giỏ hàng
   </a>
+
 </div>
 <!-- END product-purchase-container -->
 
@@ -116,7 +117,6 @@
           </li>
         </ul>
         <!-- END #product-tab -->
-
         <!-- BEGIN #product-tab-content -->
         <div id="product-tab-content" class="tab-content">
           <!-- BEGIN #product-desc -->
@@ -194,8 +194,6 @@
                 {% empty %}
                 <p>Chưa có đánh giá nào cho sản phẩm này.</p>
                 {% endfor %}
-
-                {% include 'review-paginator.html' %}
               </div>
               <!-- END col-7 -->
 
@@ -282,7 +280,6 @@
   <!-- END container -->
 </div>
 <!-- END #product -->
-
 <script>
   $(document).ready(function() {
     $('.rating i').click(function() {

@@ -9,13 +9,12 @@
                 <div class="search-toolbar">
                     <div class="row">
                         <div class="col-md-6">
-                            <h4>We found <strong>({{ search_obj|length }}) Products</strong> for you</h4>
+                            <h4>Chúng tôi tìm thấy <strong>({{ search_obj|length }}) sản phẩm</strong> dành cho bạn</h4>
                         </div>
                         <div class="col-md-6 text-right">
                             <ul class="sort-list">
-                                <li class="text"><i class="fa fa-filter"></i> Sort by:</li>
-                                <li class="active"><a href="#">Popular</a></li>
-                                <li><a href="{% url 'new-arrival' %}">New Arrival</a></li>
+                                <li class="text"><i class="fa fa-filter"></i> Sắp xếp theo:</li>
+                                <li class="active"><a href="#">Phổ biến</a></li>
                             </ul>
                         </div>
                     </div>
@@ -26,8 +25,8 @@
                         {% for product in search_obj %}
                         <div class="item item-thumbnail">
                             <a href="{% url 'product_detail' product.slug %}" class="item-image">
-                                <img src="{{ product.product_image.url }}" alt="No image" />
-                                <div class="discount">{{ product.discount_percentage }} % OFF</div>
+                                <img src="{{ product.product_image.url }}" alt="Không có hình ảnh" />
+                                <div class="discount">{{ product.discount_percentage }} % GIẢM</div>
                             </a>
 
                             <div class="item-info">
@@ -36,15 +35,18 @@
                                 </h4>
                                 {% load humanize %}
                                 <p class="item-desc">{{ product.product_description }}</p>
-                                <div class="item-price">Rs. {{ product.discounted_price|intcomma }}</div>
-                                <div class="item-discount-price">Rs. {{ product.orignal_price }}</div>
+
+                                <div class="item-price">₫ {{ product.discounted_price|intcomma }}</div>
+                                <div class="item-discount-price">₫ {{ product.orignal_price }}</div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}

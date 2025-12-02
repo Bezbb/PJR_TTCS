@@ -23,6 +23,13 @@ from .models import CustomUser as User
 from .helpers import *
 import uuid
 from .vnpay_utils import create_payment_url, verify_vnpay_return
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from openai import OpenAI
+from django.conf import settings
+
+client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
 
 def home(request):
@@ -118,6 +125,38 @@ def about_us(request):
         "latest_products": latest_products,
     }
     return render(request, "about_us.html", context)
+
+
+@login_required(login_url="login")
+def buy_now(request, slug):
+    """
+    Mua ngay 1 sản phẩm:
+    - Đảm bảo sản phẩm có trong giỏ (quantity = 1)
+    - Sau đó chuyển thẳng sang trang checkout_info để nhập địa chỉ + chọn thanh toán
+    """
+    product = get_object_or_404(Product, slug=slug)
+    user = request.user
+
+    cart_item, created = Cart.objects.get_or_create(
+        user=user,
+        product=product,
+        is_ordered=False,
+        defaults={"quantity": 1}
+    )
+
+    if not created:
+        # Mua ngay thì set về 1 sản phẩm cho rõ ràng
+        cart_item.quantity = 1
+        cart_item.save()
+
+    # Tính lại tiền cho item này (nếu bạn muốn đảm bảo luôn đúng)
+    calculate_cart_item_total(cart_item)
+
+    messages.success(
+        request,
+        f"Bạn đang mua ngay {product.product_name}. Vui lòng điền thông tin giao hàng."
+    )
+    return redirect("checkout_info")
 
 
 @login_required(login_url="login")
@@ -223,12 +262,18 @@ def get_cart_data(request):
 
 @login_required(login_url="login")
 def remove_cart(request, slug):
-    product = Product.objects.get(slug=slug)
+    product = get_object_or_404(Product, slug=slug)
     user = request.user
 
-    cart_items = Cart.objects.get(user=user, product=product, is_ordered=False)
-    cart_items.delete()
-    return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+    cart_item = Cart.objects.filter(user=user, product=product, is_ordered=False).first()
+
+    if cart_item:
+        cart_item.delete()
+        messages.success(request, f"Đã xóa {product.product_name} khỏi giỏ hàng.")
+    else:
+        messages.error(request, "Sản phẩm không tồn tại trong giỏ hàng.")
+
+    return redirect(request.META.get("HTTP_REFERER", "add_to_cart"))
 
 
 @login_required(login_url="login")
@@ -434,22 +479,16 @@ def my_account(request):
 
 
 def product_detail(request, slug):
-    # Retrieve the product by slug
     latest_products = Product.objects.filter(is_active=True).order_by("-id")[:4]
     product = get_object_or_404(Product, slug=slug)
-    product_description = ProductDescription.objects.filter(product=product)
-    product_img = ProductDescription.objects.filter(
-        product=product
-    )  # only filter images for the current product
-    information = AdditionalInformation.objects.filter(
-        product=product
-    )  # Retrieve additional information for the product
-    reviews = Review.objects.filter(
-        product=product
-    )  # only filter reviews for the current product
-    review_count = reviews.count()
 
-    # Shuffle and get random products
+    product_description = ProductDescription.objects.filter(product=product)
+    product_img = ProductDescription.objects.filter(product=product)
+    information = AdditionalInformation.objects.filter(product=product)
+    reviews_qs = Review.objects.filter(product=product).order_by("-id")
+    review_count = reviews_qs.count()
+
+    # Sản phẩm ngẫu nhiên
     products = Product.objects.all()
     shuffled_products = list(products)
     random.shuffle(shuffled_products)
@@ -459,29 +498,32 @@ def product_detail(request, slug):
     if information:
         new_product_name = information[0].new_product_name
 
+    # XỬ LÝ GỬI REVIEW
     if request.method == "POST":
-        # Check if user is authenticated
         if not request.user.is_authenticated:
-            messages.error(request, "You need to log in to submit a review.")
-            return redirect("login")  # Redirect to login page
+            messages.error(request, "Bạn cần đăng nhập để đánh giá sản phẩm.")
+            return redirect("login")
 
-        # Check if the user has purchased the product
+        # 1. Kiểm tra đã mua sản phẩm chưa
         user_purchased = OrderTracking.objects.filter(
             user=request.user, product=product
         ).exists()
         if not user_purchased:
-            messages.error(
-                request, "You can only review products you have purchased."
-            )
-            return redirect("product_detail", slug=slug)
-        if user_purchased:
-            messages.error(request, "You have already reviewed this product.")
+            messages.error(request, "Chỉ những khách đã mua hàng mới được đánh giá sản phẩm.")
             return redirect("product_detail", slug=slug)
 
-        # If the user is authenticated and has purchased the product, proceed with review submission
+        # 2. Kiểm tra đã đánh giá trước đó chưa
+        already_reviewed = Review.objects.filter(
+            user=request.user, product=product
+        ).exists()
+        if already_reviewed:
+            messages.error(request, "Bạn đã đánh giá sản phẩm này rồi.")
+            return redirect("product_detail", slug=slug)
+
+        # 3. Tạo review mới
         name = request.POST.get("name")
         email = request.POST.get("email")
-        message = request.POST.get("message")
+        message_text = request.POST.get("message")
         rating = int(request.POST.get("rating"))
 
         rating_obj = Review.objects.create(
@@ -489,25 +531,24 @@ def product_detail(request, slug):
             user=request.user,
             name=name,
             title=email,
-            review=message,
+            review=message_text,
             rating=rating,
         )
         rating_obj.save()
 
-        messages.success(request, "Your review has been submitted successfully")
+        messages.success(request, "Đánh giá của bạn đã được gửi thành công.")
         return redirect("product_detail", slug=slug)
 
-    review_obj = Review.objects.filter(product=product).order_by("-id")
+    # PHÂN TRANG REVIEW
+    paginated = Paginator(reviews_qs, 5)
+    page_number = request.GET.get("page")
     try:
-        paginated_reviews = Paginator(review_obj, 5)
-        page_number = request.GET.get("page")
-        reviews = paginated_reviews.page(page_number)
+        reviews_page = paginated.page(page_number)
     except PageNotAnInteger:
-        reviews = paginated_reviews.page(1)
+        reviews_page = paginated.page(1)
     except EmptyPage:
-        reviews = paginated_reviews.page(paginated_reviews.num_pages)
+        reviews_page = paginated.page(paginated.num_pages)
 
-    # Check if the user is authenticated to filter their reviews
     user_reviews = None
     if request.user.is_authenticated:
         user_reviews = Review.objects.filter(user=request.user, product=product)
@@ -519,14 +560,14 @@ def product_detail(request, slug):
         "information": information,
         "new_product_name": new_product_name,
         "review_count": review_count,
-        "reviews": reviews,
+        "reviews": reviews_page,           # ← chỉ để 1 key reviews
         "user_reviews": user_reviews,
         "random_products": random_products,
         "latest_products": latest_products,
-        "reviews": paginated_reviews,
     }
 
     return render(request, "product_detail.html", context)
+
 
 
 def product(request):
@@ -1003,3 +1044,309 @@ def return_order(request, pid):
 def logout_page(request):
     logout(request)
     return redirect("home")
+
+
+
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+
+from openai import OpenAI
+
+client = OpenAI(api_key=settings.OPENAI_API_KEY)
+
+
+@csrf_exempt  # tạm thời exempt để khỏi dính lỗi CSRF
+def ai_chat(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Only POST allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        user_message = data.get("message", "").strip()
+
+        if not user_message:
+            return JsonResponse({"error": "Message is empty"}, status=400)
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Bạn là trợ lý AI hỗ trợ khách mua laptop / đồ điện tử trên E-Tech Shop. Luôn trả lời tiếng Việt, ngắn gọn, thân thiện."
+                },
+                {
+                    "role": "user",
+                    "content": user_message
+                }
+            ],
+            temperature=0.7,
+        )
+
+        ai_reply = response.choices[0].message.content
+        return JsonResponse({"reply": ai_reply})
+
+    except Exception as e:
+        print("AI_CHAT_ERROR:", e)   # xem ở terminal runserver
+        return JsonResponse({"error": str(e)}, status=500)
+    
+    
+
+
+# ======================== HỖ TRỢ CHATBOX AI TƯ VẤN MUA HÀNG ========================
+import re
+from django.urls import reverse
+from django.db.models import ExpressionWrapper, F, DecimalField, Q
+
+
+def extract_budget_vnd(text: str):
+    """
+    Tìm ngân sách từ câu hỏi, ví dụ:
+    - 'dưới 20 triệu'
+    - 'tầm 15tr'
+    - 'khoảng 25-30tr'
+    Trả về (min_price, max_price) theo VNĐ hoặc (None, None) nếu không thấy.
+    """
+    text_norm = text.lower().replace("triệu", "tr").replace(" ", "")
+    numbers = re.findall(r"(\d+)\s*tr", text_norm)
+
+    if not numbers:
+        return None, None
+
+    nums = [int(n) * 1_000_000 for n in numbers]
+
+    # 'từ 15tr đến 20tr', '15-20tr'
+    if "đến" in text_norm or "-" in text_norm or "từ" in text_norm:
+        return min(nums), max(nums)
+
+    # 'dưới 20tr'
+    if "dưới" in text_norm or "<" in text_norm:
+        return None, nums[0]
+
+    # 'trên 20tr'
+    if "trên" in text_norm or ">" in text_norm:
+        return nums[0], None
+
+    # 'tầm 20tr', 'khoảng 18tr'
+    return None, nums[0]
+
+
+def extract_category_from_message(text: str):
+    """
+    Đoán user đang hỏi về:
+    - 'laptop'
+    - 'điện thoại' / 'phone' / 'mobile'
+    - 'tablet' / 'ipad'
+    Trả về tên Category đúng với DB của bạn hoặc None.
+    """
+    t = text.lower()
+
+    if any(k in t for k in ["laptop", "máy tính xách tay"]):
+        return "Laptops"
+    if any(k in t for k in ["điện thoại", "phone", "smartphone", "mobile"]):
+        return "Mobile Phones"
+    if any(k in t for k in ["tablet", "ipad"]):
+        return "Tablet"
+
+    return None
+
+
+def search_products_for_message(message: str, max_results: int = 3):
+    """
+    Tìm sản phẩm phù hợp dựa trên câu hỏi của user:
+    - Lọc theo khoảng giá (nếu có)
+    - Lọc theo loại (Laptop / Mobile / Tablet nếu đoán được)
+    - Lọc theo keyword trong tên / mô tả / hãng / category / AdditionalInformation
+    - Ưu tiên: is_trending, giá thấp hơn
+    """
+
+    # Annotate giá sau giảm
+    qs = Product.objects.filter(is_active=True, is_stock=True).annotate(
+        discounted_price_annotated=ExpressionWrapper(
+            F("orignal_price")
+            - F("orignal_price") * F("discount_percentage") / 100,
+            output_field=DecimalField(max_digits=20, decimal_places=2),
+        )
+    )
+
+    # -------------------------------
+    # 1) LỌC THEO CATEGORY
+    # -------------------------------
+    cat_name = extract_category_from_message(message)
+    if cat_name:
+        qs = qs.filter(category__category__icontains=cat_name)
+
+    # -------------------------------
+    # 2) LỌC THEO GIÁ → QUAN TRỌNG
+    # -------------------------------
+    min_price, max_price = extract_budget_vnd(message)
+
+    if min_price is not None:
+        qs = qs.filter(discounted_price_annotated__gte=min_price)
+
+    if max_price is not None:
+        qs = qs.filter(discounted_price_annotated__lte=max_price)
+
+    # -------------------------------
+    # 3) LỌC THEO KEYWORDS
+    # -------------------------------
+    stop_words = {
+        "tư","vấn","mua","giúp","cho","mình","em","cần",
+        "con","nào","loại","máy","tính","laptop","điện","thoại",
+        "phone","tablet","ipad","dưới","trên","khoảng","tầm",
+        "triệu","vnd","vnđ"
+    }
+
+    words = re.split(r"\s+", message.lower())
+    keywords = [w.strip(".,?!") for w in words if w and w not in stop_words]
+
+    if keywords:
+        q = Q()
+        for kw in keywords:
+            q |= Q(product_name__icontains=kw)
+            q |= Q(product_description__icontains=kw)
+            q |= Q(company__company__icontains=kw)
+            q |= Q(category__category__icontains=kw)
+            q |= Q(additional_informations__feature__icontains=kw)
+            q |= Q(additional_informations__new_product_description__icontains=kw)
+        qs = qs.filter(q).distinct()
+
+    # -------------------------------
+    # 4) SORT & LIMIT
+    # -------------------------------
+    qs = qs.order_by(
+        "-is_trending",
+        "discounted_price_annotated",
+        "-created_at"
+    )[:max_results]
+
+    # -------------------------------
+    # 5) FORMAT OUTPUT
+    # -------------------------------
+    products_data = []
+    for p in qs:
+        try:
+            url = reverse("product_detail", args=[p.slug])
+        except:
+            url = "#"
+
+        # Lấy giá sau giảm
+        try:
+            price_val = float(p.discounted_price())
+        except:
+            price_val = float(p.orignal_price)
+
+        extra_info_qs = p.additional_informations.all()[:2]
+        extra_parts = []
+        for info in extra_info_qs:
+            if info.feature:
+                extra_parts.append(
+                    f"{info.feature}: {info.new_product_description or info.exisiting_product_description1}"
+                )
+        extra_text = " | ".join(extra_parts)
+
+        short_desc = p.product_description[:120] + "..." if p.product_description else ""
+        if extra_text:
+            short_desc = f"{short_desc} ({extra_text})"
+
+        products_data.append({
+            "name": p.product_name,
+            "price": price_val,
+            "short_desc": short_desc,
+            "url": url,
+            "category": p.category.category,
+            "brand": p.company.company,
+            "image": p.product_image.url if p.product_image else "",
+        })
+
+    return products_data
+
+
+
+def build_products_context_text(products_data):
+    """
+    Chuyển danh sách sản phẩm sang text cho AI đọc.
+    """
+    if not products_data:
+        return "Hiện tại không tìm thấy sản phẩm nào phù hợp trong kho hàng."
+
+    lines = ["Dưới đây là một số sản phẩm trong kho E-Tech Shop phù hợp với yêu cầu khách hàng:"]
+
+    for i, p in enumerate(products_data, start=1):
+        price_str = f"{p['price']:,.0f} đ" if p["price"] else "Không rõ giá"
+        lines.append(
+            f"{i}. {p['name']} | Danh mục: {p['category']} | Hãng: {p['brand']} | "
+            f"Giá: {price_str} | Link: {p['url']} | Mô tả: {p['short_desc']}"
+        )
+    return "\n".join(lines)
+
+
+@csrf_exempt
+@csrf_exempt
+def ai_chat(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Only POST allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        user_message = data.get("message", "").strip()
+
+        if not user_message:
+            return JsonResponse({"error": "Message is empty"}, status=400)
+
+        # 1. Tìm sản phẩm từ DB (tối đa 3)
+        products = search_products_for_message(user_message)
+        products_context = build_products_context_text(products)
+
+        # 2. Gửi lên OpenAI với prompt NGẮN GỌN HƠN
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "Bạn là trợ lý bán hàng của website E-Tech Shop. "
+                        "Bạn được cung cấp DANH SÁCH SẢN PHẨM trong kho (kèm tên, giá, hãng, mô tả). "
+                        "Nhiệm vụ: chọn tối đa 3 sản phẩm phù hợp nhất với nhu cầu khách hàng "
+                        "và giải thích NGẮN GỌN.\n\n"
+                        "YÊU CẦU RẤT QUAN TRỌNG:\n"
+                        "- Luôn trả lời bằng TIẾNG VIỆT, thân thiện.\n"
+                        "- Không được đưa ra đường link / URL (vì hệ thống sẽ hiển thị thẻ sản phẩm riêng).\n"
+                        "- Không liệt kê cấu hình quá chi tiết (CPU, RAM, v.v.) trừ khi khách hỏi rõ.\n"
+                        "- Tổng câu trả lời nên dưới 4–5 câu.\n\n"
+                        "FORMAT TRẢ LỜI:\n"
+                        "Mở đầu 1 câu chào ngắn.\n"
+                        "Sau đó liệt kê dạng:\n"
+                        "1) TÊN SẢN PHẨM 1 – Giá khoảng X đ. Lý do gợi ý: ...\n"
+                        "2) TÊN SẢN PHẨM 2 – Giá khoảng Y đ. Lý do gợi ý: ...\n"
+                        "3) TÊN SẢN PHẨM 3 – Giá khoảng Z đ. Lý do gợi ý: ...\n"
+                        "\"\"\"\n"
+                        "Cuối cùng thêm 1 câu rủ khách bấm vào sản phẩm để xem chi tiết hoặc hỏi thêm."
+                    ),
+                },
+                {
+                    "role": "system",
+                    "content": products_context,
+                },
+                {
+                    "role": "user",
+                    "content": user_message,
+                },
+            ],
+            temperature=0.4,
+        )
+
+        ai_reply = response.choices[0].message.content
+
+        return JsonResponse(
+            {
+                "reply": ai_reply,
+                "products": products,   # để JS vẽ card
+            }
+        )
+
+    except Exception as e:
+        print("AI_CHAT_ERROR:", e)
+        return JsonResponse({"error": str(e)}, status=500)
