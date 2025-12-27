@@ -1,150 +1,96 @@
 {% extends 'index.html' %}
+{% load static %}
+
+{% block css %}
+<link href="{% static 'assets/css/checkout_modern.css' %}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-{% load static %}   
-        
-<!-- BEGIN #checkout-payment -->
-<div class="section-container" id="checkout-info">
-    <!-- BEGIN container -->
-    <div class="container">
-        <!-- BEGIN checkout -->
-        <div class="checkout">
-            <form action="{% url 'checkout_info' %}" method="POST" name="form_shipping" class="form-horizontal">
-                {% csrf_token %}
-                <!-- BEGIN checkout-header -->
-                <div class="checkout-header">
-                    <!-- BEGIN row -->
-                    <div class="row">
-                        <!-- BEGIN col-3 -->
-                        <div class="col-md-3 col-sm-3">
-                            <div class="step">
-                                <a href="{% url 'add_to_cart' %}">
-                                    <div class="number">1</div>
-                                    <div class="info">
-                                        <div class="title">Giao hàng miễn phí</div>
-                                        <div class="desc">Miễn phí giao hàng toàn quốc. Không yêu cầu giá trị đơn hàng tối thiểu.</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <!-- END col-3 -->
 
-                        <div class="col-md-3 col-sm-3">
-                            <div class="step active">
-                                <a href="#">
-                                    <div class="number">2</div>
-                                    <div class="info">
-                                        <div class="title">Địa chỉ giao hàng</div>
-                                        <div class="desc">Cung cấp địa chỉ giao hàng để chúng tôi có thể giao đơn cho bạn.</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
+<section class="checkout-page">
+  <div class="container">
 
-                        <div class="col-md-3 col-sm-3">
-                            <div class="step">
-                                <a href="#">
-                                    <div class="number">3</div>
-                                    <div class="info">
-                                        <div class="title">Thanh toán</div>
-                                        <div class="desc">Chọn phương thức thanh toán mà bạn mong muốn.</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3 col-sm-3">
-                            <div class="step">
-                                <a href="/checkout_complete">
-                                    <div class="number">4</div>
-                                    <div class="info">
-                                        <div class="title">Hoàn tất đơn hàng</div>
-                                        <div class="desc">Kiểm tra chi tiết đơn hàng và hoàn tất thanh toán.</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- END row -->
-                </div>
-                <!-- END checkout-header -->
-                
-                <!-- BEGIN checkout-body -->
-                <div class="checkout-body">
-                    <div class="form-group">
-                        <label class="control-label col-md-4">
-                            Tên <span class="text-danger">*</span>
-                        </label>
-
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="first_name" required />
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="control-label col-md-4">
-                            Họ <span class="text-danger">*</span>
-                        </label>
-
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="last_name" required />
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="control-label col-md-4">
-                            Số điện thoại <span class="text-danger">*</span>
-                        </label>
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="primary_phone" required />
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="control-label col-md-4">
-                            Địa chỉ <span class="text-danger">*</span>
-                        </label>
-                        <div class="col-md-4">
-                            <input type="text" class="form-control m-b-10" name="street_address" required />
-                        </div>
-                    </div>
-
-                    <!-- PHƯƠNG THỨC THANH TOÁN -->
-                    <div class="form-group">
-                        <label class="control-label col-md-4">
-                            Phương thức thanh toán <span class="text-danger">*</span>
-                        </label>
-                        <div class="col-md-4">
-                            <div class="radio">
-                                <label>
-                                    <input type="radio" name="payment_method" value="cod" checked>
-                                    Thanh toán khi nhận hàng (COD)
-                                </label>
-                            </div>
-                            <div class="radio">
-                                <label>
-                                    <input type="radio" name="payment_method" value="online">
-                                    Thanh toán online (VNPay)
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <hr>
-                </div>
-                <!-- END checkout-body -->
-
-                <!-- BEGIN checkout-footer -->
-                <div class="checkout-footer">
-                    <a href="{% url 'add_to_cart' %}" class="btn btn-white btn-lg pull-left">Quay lại</a>
-                    <button type="submit" class="btn btn-inverse btn-lg p-l-30 p-r-30 m-l-10">Tiếp tục</button>
-                </div>
-                <!-- END checkout-footer -->
-            </form>
-        </div>
-        <!-- END checkout -->
+    <!-- ================= STEPS ================= -->
+    <div class="checkout-steps">
+      <div class="step done">
+        <span>1</span>
+        <p>Giỏ hàng</p>
+      </div>
+      <div class="step active">
+        <span>2</span>
+        <p>Địa chỉ giao hàng</p>
+      </div>
+      <div class="step">
+        <span>3</span>
+        <p>Thanh toán</p>
+      </div>
+      <div class="step">
+        <span>4</span>
+        <p>Hoàn tất</p>
+      </div>
     </div>
-    <!-- END container -->
-</div>
-<!-- END #checkout-info -->
-       
+
+    <!-- ================= FORM ================= -->
+    <form action="{% url 'checkout_info' %}" method="POST" class="checkout-form">
+      {% csrf_token %}
+
+      <div class="checkout-card">
+
+        <h3>Thông tin giao hàng</h3>
+
+        <div class="form-grid">
+          <div>
+            <label>Tên *</label>
+            <input type="text" name="first_name" required>
+          </div>
+
+          <div>
+            <label>Họ *</label>
+            <input type="text" name="last_name" required>
+          </div>
+
+          <div>
+            <label>Số điện thoại *</label>
+            <input type="text" name="primary_phone" required>
+          </div>
+
+          <div class="full">
+            <label>Địa chỉ giao hàng *</label>
+            <input type="text" name="street_address" required>
+          </div>
+        </div>
+
+        <h3>Phương thức thanh toán</h3>
+
+        <div class="payment-methods">
+          <label class="payment-option">
+            <input type="radio" name="payment_method" value="cod" checked>
+            <span>
+              <strong>Thanh toán khi nhận hàng (COD)</strong>
+              <small>Thanh toán trực tiếp cho shipper</small>
+            </span>
+          </label>
+
+          <label class="payment-option">
+            <input type="radio" name="payment_method" value="online">
+            <span>
+              <strong>Thanh toán online (VNPay)</strong>
+              <small>Thanh toán an toàn qua cổng VNPay</small>
+            </span>
+          </label>
+        </div>
+
+      </div>
+
+      <!-- ACTION -->
+      <div class="checkout-actions">
+        <a href="{% url 'add_to_cart' %}" class="btn-back">← Quay lại</a>
+        <button type="submit" class="btn-next">Tiếp tục</button>
+      </div>
+
+    </form>
+
+  </div>
+</section>
+
 {% endblock %}

@@ -45,7 +45,6 @@ urlpatterns = [
 
     # Account / Orders
     path("my_account", views.my_account, name="my_account"),
-    path("about_us", views.about_us, name="about_us"),
     path("order_tracking", views.order_tracking, name="order_tracking"),
     path("order-progress/<int:pid>/", views.order_progress, name="order_progress"),
     path("order-history", views.order_history, name="order-history"),

@@ -182,3 +182,5 @@ class Review(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
     forget_token = models.CharField(max_length=100, blank=True, null=True)
+
+

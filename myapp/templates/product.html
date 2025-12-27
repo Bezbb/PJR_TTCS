@@ -1,149 +1,141 @@
 {% extends 'index.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block css %}
+<link href="{% static 'assets/css/product_v2.css' %}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-{% load static %} 
 
-<!-- BEGIN search-results -->
-<div id="search-results" class="section-container bg-silver">
-    <!-- BEGIN container -->
-    <div class="container">
-        <!-- BEGIN search-container -->
-        <div class="search-container">
-            <!-- BEGIN search-content -->
-            <div class="search-content">
-                <!-- BEGIN search-toolbar -->
-                <div class="search-toolbar">
-                    <!-- BEGIN row -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h4>Chúng tôi có<strong> ({{total_products}}) {{company_name}} </strong> Sản phẩm dành cho bạn</h4>
-                        </div>
-                    </div>
-                    <!-- END row -->
-                </div>
-                <!-- END search-toolbar -->
+<section class="product-v2-page">
+  <div class="container">
 
-                <div class="search-item-container">
-                    <!-- BEGIN item-row -->
-                    <div class="item-row">
-                        <!-- BEGIN item -->
-                        {% for product in product_names %}
-                        <div class="item item-thumbnail">
-                            <a href="{% url 'product_detail' product.slug %}" class="item-image">
-                                <img src="{{ product.product_image.url }}" alt="No image" /> 
-                                <div class="discount">{{ product.discount_percentage }} % OFF</div>
-                            </a>
+    <!-- HEADER -->
+    <div class="product-v2-header">
+      <h3>
+        Tìm thấy <strong>{{ total_products }}</strong>
+        {% if company_name %}
+          sản phẩm từ <strong>{{ company_name }}</strong>
+        {% endif %}
+      </h3>
+    </div>
 
-                            <div class="item-info">
-                                <h4 class="item-title">
-                                    <a href="{% url 'product_detail' product.slug  %}">{{ product.product_name }}</a>
-                                </h4>
-                                {% load humanize %}
-                                <p class="item-desc">{{ product.product_description }}</p>
-                                <div class="item-price">{{ product.discounted_price|intcomma }} đ</div>
-                                <div class="item-discount-price">{{ product.orignal_price }} đ</div>
-                            </div>
-                        </div>
-                        <!-- END item -->
-                        {% endfor %}
-                    </div>
-                    <!-- END item-row -->
-                </div>
+    <div class="product-v2-layout">
 
-                <!-- BEGIN pagination -->
-                <div class="row justify-content-center">
-                    <div class="col-md-6">
-                        <nav aria-label="Page navigation example">
-                            <ul class="pagination">
-                                {% if product_names.has_previous %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page=1" aria-label="First">
-                                            <span aria-hidden="true">&laquo;&laquo;</span>
-                                            <span class="sr-only">First</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ product_names.previous_page_number }}" aria-label="Previous">
-                                            <span aria-hidden="true">&laquo;</span>
-                                            <span class="sr-only">Previous</span>
-                                        </a>
-                                    </li>
-                                {% endif %}
-                                {% for i in product_names.paginator.page_range %}
-                                    <li class="page-item {% if product_names.number == i %}active{% endif %}">
-                                        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
-                                    </li>
-                                {% endfor %}
-                                {% if product_names.has_next %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ product_names.next_page_number }}" aria-label="Next">
-                                            <span aria-hidden="true">&raquo;</span>
-                                            <span class="sr-only">Next</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ product_names.paginator.num_pages }}" aria-label="Last">
-                                            <span aria-hidden="true">&raquo;&raquo;</span>
-                                            <span class="sr-only">Last</span>
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
-                <!-- END pagination -->
+      <!-- ================= PRODUCT GRID ================= -->
+      <div class="product-v2-list">
+
+        <div class="product-v2-grid">
+          {% for product in product_names %}
+          <div class="product-v2-card">
+
+            <a href="{% url 'product_detail' product.slug %}" class="product-v2-image">
+              <img src="{{ product.product_image.url }}" alt="">
+              <span class="product-v2-badge">
+                {{ product.discount_percentage }}% OFF
+              </span>
+            </a>
+
+            <div class="product-v2-info">
+              <h4 class="product-v2-name">
+                <a href="{% url 'product_detail' product.slug %}">
+                  {{ product.product_name }}
+                </a>
+              </h4>
+
+              <p class="product-v2-desc">
+                {{ product.product_description }}
+              </p>
+
+              <div class="product-v2-price">
+                <span class="price-new">
+                  {{ product.discounted_price|intcomma }} đ
+                </span>
+                <span class="price-old">
+                  {{ product.orignal_price|intcomma }} đ
+                </span>
+              </div>
             </div>
-            <!-- END search-content -->
 
-            <!-- BEGIN search-sidebar -->
-            <div class="search-sidebar">
-                <h4 class="title">Filter By</h4>
-                <form action="{% url 'product' %}" method="post" name="filter_form">
-                    {% csrf_token %}
-                    {% if messages %}
-                        <div class="alert alert-warning" role="">
-                            {% for message in messages %}
-                                {{ message }}   
-                            {% endfor %}
-                        </div>    
-                    {% endif %}
-                    <input type="hidden" name="company_name" value="{{ company_name }}">
-                    <div class="form-group">
-                        <label class="control-label">Tìm sản phẩm</label>
-                        <input type="text" class="form-control input-sm" name="search" placeholder="Sản phẩm bạn muốn tìm" />
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label">Trị giá</label>
-                        <div class="row row-space-0">
-                            <div class="col-md-5">
-                                <input type="number" class="form-control input-sm" name="price_from"  placeholder="Giá tối thiểu" />
-                            </div>
-                            <div class="col-md-2 text-center p-t-5 f-s-12 text-muted">to</div>
-                            <div class="col-md-5">
-                                <input type="number" class="form-control input-sm" name="price_to"  placeholder="Giá tối đa" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="m-b-30">
-                        <button type="submit" class="btn btn-sm btn-inverse"><i class="fa fa-search"></i> Tìm kiếm ngay</button>
-                    </div>
-                </form>
+          </div>
+          {% endfor %}
+        </div>
 
-                {% if show_top_companies %}
-                <h4 class="title m-b-0">Thương hiệu nổi bật</h4>
-                <ul class="search-category-list">
-                    {% for company, count in company_counts.items %}
-                        <li><a href="{% url 'product_by_company' company_name=company %}">{{ company }} <span class="pull-right">({{ count }})</span></a></li>
-                    {% endfor %}
-                </ul>
+        <!-- PAGINATION -->
+        <div class="product-v2-pagination">
+          <ul>
+            {% if product_names.has_previous %}
+              <li><a href="?page={{ product_names.previous_page_number }}">‹</a></li>
             {% endif %}
 
-            </div>
-            <!-- END search-sidebar -->
+            {% for i in product_names.paginator.page_range %}
+              <li class="{% if product_names.number == i %}active{% endif %}">
+                <a href="?page={{ i }}">{{ i }}</a>
+              </li>
+            {% endfor %}
+
+            {% if product_names.has_next %}
+              <li><a href="?page={{ product_names.next_page_number }}">›</a></li>
+            {% endif %}
+          </ul>
         </div>
-        <!-- END search-container -->
+
+      </div>
+
+      <!-- ================= SIDEBAR ================= -->
+      <aside class="product-v2-sidebar">
+
+        <h4>Bộ lọc sản phẩm</h4>
+
+        <form action="{% url 'product' %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="company_name" value="{{ company_name }}">
+
+          {% if messages %}
+          <div class="alert alert-warning">
+            {% for message in messages %}
+              {{ message }}
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="form-group">
+            <label>Tên sản phẩm</label>
+            <input type="text" name="search" placeholder="Nhập tên sản phẩm">
+          </div>
+
+          <div class="form-group">
+            <label>Khoảng giá</label>
+            <div class="price-range">
+              <input type="number" name="price_from" placeholder="Từ">
+              <span>-</span>
+              <input type="number" name="price_to" placeholder="Đến">
+            </div>
+          </div>
+
+          <button type="submit" class="btn-filter">
+            <i class="fa fa-search"></i> Lọc ngay
+          </button>
+        </form>
+
+        {% if show_top_companies %}
+        <h4 class="m-t-20">Thương hiệu nổi bật</h4>
+        <ul class="brand-list">
+          {% for company, count in company_counts.items %}
+          <li>
+            <a href="{% url 'product_by_company' company_name=company %}">
+              {{ company }} <span>({{ count }})</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+      </aside>
+
     </div>
-    <!-- END container -->
-</div>
-<!-- END search-results -->
+  </div>
+</section>
+
 {% endblock %}

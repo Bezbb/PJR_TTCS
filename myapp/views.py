@@ -28,6 +28,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from openai import OpenAI
 from django.conf import settings
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password
+from django.db import transaction
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
@@ -118,13 +122,6 @@ def calculate_delivery_date(order_date):
     return current_date
 
 
-def about_us(request):
-    latest_products = Product.objects.filter(is_active=True).order_by("-id")[:4]
-
-    context = {
-        "latest_products": latest_products,
-    }
-    return render(request, "about_us.html", context)
 
 
 @login_required(login_url="login")
@@ -433,22 +430,7 @@ def checkout_complete(request):
     return render(request, "checkout_complete.html", context)
 
 
-def contact_us(request):
-    contact = Contact.objects.all()
-    if request.method == "POST":
-        name = request.POST.get("name")
-        email = request.POST.get("email")
-        subject = request.POST.get("subject")
-        message = request.POST.get("message")
-        contact = contact.create(
-            name=name, email=email, subject=subject, message=message
-        )
-        contact.save()
 
-        messages.info(request, "Your message has been sent successfully")
-        return redirect("contact_us")
-
-    return render(request, "contact_us.html")
 
 
 @login_required(login_url="login")
@@ -460,9 +442,7 @@ def payment_failed(request):
     return render(request, "payment-failed.html", context)
 
 
-@login_required(login_url="login")
-def faq(request):
-    return render(request, "faq.html")
+
 
 
 @login_required(login_url="login")
@@ -652,28 +632,7 @@ def product(request):
     return render(request, "product.html", context)
 
 
-def new_arrival(request):
-    seven_days_ago = timezone.now() - timedelta(days=7)
-    new_arrivals = Product.objects.filter(
-        created_at__gte=seven_days_ago
-    ).order_by("-id")
-    latest_products = Product.objects.filter(is_active=True).order_by("-id")[:4]
-    paginator = Paginator(new_arrivals, 6)
-    page_number = request.GET.get("page")
 
-    try:
-        paginated_products = paginator.page(page_number)
-    except PageNotAnInteger:
-        paginated_products = paginator.page(1)
-    except EmptyPage:
-        paginated_products = paginator.page(paginator.num_pages)
-
-    context = {
-        "new_arrivals": paginated_products,
-        "latest_products": latest_products,
-    }
-
-    return render(request, "new-arrival.html", context)
 
 
 @login_required(login_url="login")
@@ -915,34 +874,64 @@ def login_page(request):
 
 def register(request):
     latest_products = Product.objects.filter(is_active=True).order_by("-id")[:4]
-    if request.method == "POST":
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        email = request.POST.get("email")
-        profile_photo = request.FILES.get("profile_photo")
-        password = request.POST.get("password")
-        repassword = request.POST.get("repassword")
 
-        user = User.objects.filter(email=email)
-        if user.exists():
-            messages.info(request, "Email already exists")
+    if request.method == "POST":
+        first_name = request.POST.get("first_name", "").strip()
+        last_name = request.POST.get("last_name", "").strip()
+        email = request.POST.get("email", "").strip().lower()
+        password = request.POST.get("password", "")
+        repassword = request.POST.get("repassword", "")
+
+        # 1️⃣ Validate input rỗng
+        if not all([first_name, last_name, email, password, repassword]):
+            messages.error(request, "Vui lòng điền đầy đủ thông tin.")
             return redirect("register")
-        else:
-            user = User.objects.create_user(
-                email=email,
-                first_name=first_name,
-                last_name=last_name,
-                user_profile=profile_photo,
-                password=password,
-            )
-            user.set_password(password)
-            user.save()
-            login(request, user)
-            return redirect("/")
-    context = {
+
+        # 2️⃣ Validate email
+        try:
+            validate_email(email)
+        except ValidationError:
+            messages.error(request, "Email không hợp lệ.")
+            return redirect("register")
+
+        # 3️⃣ Check email đã đăng ký chưa
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Email này đã được đăng ký.")
+            return redirect("register")
+
+        # 4️⃣ Check password nhập lại
+        if password != repassword:
+            messages.error(request, "Mật khẩu nhập lại không khớp.")
+            return redirect("register")
+
+        # 5️⃣ Validate độ mạnh mật khẩu (Django chuẩn)
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            messages.error(request, " ".join(e.messages))
+            return redirect("register")
+
+        # 6️⃣ Tạo user (atomic)
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name,
+                    password=password,
+                )
+        except Exception:
+            messages.error(request, "Có lỗi xảy ra khi tạo tài khoản.")
+            return redirect("register")
+
+        # 7️⃣ Auto login
+        login(request, user)
+        messages.success(request, "Đăng ký tài khoản thành công!")
+        return redirect("/")
+
+    return render(request, "register.html", {
         "latest_products": latest_products,
-    }
-    return render(request, "register.html", context)
+    })
 
 
 def forget_password(request):
@@ -962,7 +951,7 @@ def forget_password(request):
             profile_obj.forget_token = token
             profile_obj.save()
             send_email(user_obj.email, token)
-            messages.success(request, "An email has been sent.")
+            messages.success(request, "Vui lòng kiểm tra email của bạn.")
             return redirect("forget_password")
 
     except Exception as e:
@@ -1058,89 +1047,55 @@ from openai import OpenAI
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
 
-@csrf_exempt  # tạm thời exempt để khỏi dính lỗi CSRF
-def ai_chat(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Only POST allowed"}, status=405)
-
-    try:
-        data = json.loads(request.body.decode("utf-8"))
-        user_message = data.get("message", "").strip()
-
-        if not user_message:
-            return JsonResponse({"error": "Message is empty"}, status=400)
-
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Bạn là trợ lý AI hỗ trợ khách mua laptop / đồ điện tử trên E-Tech Shop. Luôn trả lời tiếng Việt, ngắn gọn, thân thiện."
-                },
-                {
-                    "role": "user",
-                    "content": user_message
-                }
-            ],
-            temperature=0.7,
-        )
-
-        ai_reply = response.choices[0].message.content
-        return JsonResponse({"reply": ai_reply})
-
-    except Exception as e:
-        print("AI_CHAT_ERROR:", e)   # xem ở terminal runserver
-        return JsonResponse({"error": str(e)}, status=500)
-    
-    
 
 
 # ======================== HỖ TRỢ CHATBOX AI TƯ VẤN MUA HÀNG ========================
+import json
 import re
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.db.models import ExpressionWrapper, F, DecimalField, Q
+from openai import OpenAI
+from django.conf import settings
 
+from .models import Product
+
+client = OpenAI(api_key=settings.OPENAI_API_KEY)
+
+
+# ======================== EXTRACT BUDGET ========================
 
 def extract_budget_vnd(text: str):
-    """
-    Tìm ngân sách từ câu hỏi, ví dụ:
-    - 'dưới 20 triệu'
-    - 'tầm 15tr'
-    - 'khoảng 25-30tr'
-    Trả về (min_price, max_price) theo VNĐ hoặc (None, None) nếu không thấy.
-    """
-    text_norm = text.lower().replace("triệu", "tr").replace(" ", "")
-    numbers = re.findall(r"(\d+)\s*tr", text_norm)
+    text_norm = (
+        text.lower()
+        .replace("triệu", "tr")
+        .replace("vnđ", "")
+        .replace("vnd", "")
+        .replace(" ", "")
+    )
 
+    numbers = re.findall(r"(\d+)tr", text_norm)
     if not numbers:
         return None, None
 
     nums = [int(n) * 1_000_000 for n in numbers]
 
-    # 'từ 15tr đến 20tr', '15-20tr'
-    if "đến" in text_norm or "-" in text_norm or "từ" in text_norm:
+    if any(k in text_norm for k in ["đến", "-", "từ"]):
         return min(nums), max(nums)
 
-    # 'dưới 20tr'
-    if "dưới" in text_norm or "<" in text_norm:
+    if any(k in text_norm for k in ["dưới", "<"]):
         return None, nums[0]
 
-    # 'trên 20tr'
-    if "trên" in text_norm or ">" in text_norm:
+    if any(k in text_norm for k in ["trên", ">"]):
         return nums[0], None
 
-    # 'tầm 20tr', 'khoảng 18tr'
     return None, nums[0]
 
 
+# ======================== EXTRACT CATEGORY ========================
+
 def extract_category_from_message(text: str):
-    """
-    Đoán user đang hỏi về:
-    - 'laptop'
-    - 'điện thoại' / 'phone' / 'mobile'
-    - 'tablet' / 'ipad'
-    Trả về tên Category đúng với DB của bạn hoặc None.
-    """
     t = text.lower()
 
     if any(k in t for k in ["laptop", "máy tính xách tay"]):
@@ -1153,45 +1108,29 @@ def extract_category_from_message(text: str):
     return None
 
 
-def search_products_for_message(message: str, max_results: int = 3):
-    """
-    Tìm sản phẩm phù hợp dựa trên câu hỏi của user:
-    - Lọc theo khoảng giá (nếu có)
-    - Lọc theo loại (Laptop / Mobile / Tablet nếu đoán được)
-    - Lọc theo keyword trong tên / mô tả / hãng / category / AdditionalInformation
-    - Ưu tiên: is_trending, giá thấp hơn
-    """
+# ======================== SEARCH PRODUCTS ========================
 
-    # Annotate giá sau giảm
+def search_products_for_message(message: str, max_results: int = 3):
     qs = Product.objects.filter(is_active=True, is_stock=True).annotate(
-        discounted_price_annotated=ExpressionWrapper(
-            F("orignal_price")
-            - F("orignal_price") * F("discount_percentage") / 100,
+        discounted_price=ExpressionWrapper(
+            F("orignal_price") - F("orignal_price") * F("discount_percentage") / 100,
             output_field=DecimalField(max_digits=20, decimal_places=2),
         )
     )
 
-    # -------------------------------
-    # 1) LỌC THEO CATEGORY
-    # -------------------------------
-    cat_name = extract_category_from_message(message)
-    if cat_name:
-        qs = qs.filter(category__category__icontains=cat_name)
+    # 1️⃣ CATEGORY
+    category = extract_category_from_message(message)
+    if category:
+        qs = qs.filter(category__category__icontains=category)
 
-    # -------------------------------
-    # 2) LỌC THEO GIÁ → QUAN TRỌNG
-    # -------------------------------
+    # 2️⃣ PRICE
     min_price, max_price = extract_budget_vnd(message)
+    if min_price:
+        qs = qs.filter(discounted_price__gte=min_price)
+    if max_price:
+        qs = qs.filter(discounted_price__lte=max_price)
 
-    if min_price is not None:
-        qs = qs.filter(discounted_price_annotated__gte=min_price)
-
-    if max_price is not None:
-        qs = qs.filter(discounted_price_annotated__lte=max_price)
-
-    # -------------------------------
-    # 3) LỌC THEO KEYWORDS
-    # -------------------------------
+    # 3️⃣ KEYWORDS
     stop_words = {
         "tư","vấn","mua","giúp","cho","mình","em","cần",
         "con","nào","loại","máy","tính","laptop","điện","thoại",
@@ -1199,154 +1138,90 @@ def search_products_for_message(message: str, max_results: int = 3):
         "triệu","vnd","vnđ"
     }
 
-    words = re.split(r"\s+", message.lower())
-    keywords = [w.strip(".,?!") for w in words if w and w not in stop_words]
+    words = re.findall(r"\w+", message.lower())
+    keywords = [w for w in words if w not in stop_words and len(w) > 1]
 
     if keywords:
         q = Q()
         for kw in keywords:
-            q |= Q(product_name__icontains=kw)
-            q |= Q(product_description__icontains=kw)
-            q |= Q(company__company__icontains=kw)
-            q |= Q(category__category__icontains=kw)
-            q |= Q(additional_informations__feature__icontains=kw)
-            q |= Q(additional_informations__new_product_description__icontains=kw)
+            q |= (
+                Q(product_name__icontains=kw)
+                | Q(product_description__icontains=kw)
+                | Q(company__company__icontains=kw)
+                | Q(category__category__icontains=kw)
+                | Q(additional_informations__feature__icontains=kw)
+                | Q(additional_informations__new_product_description__icontains=kw)
+            )
         qs = qs.filter(q).distinct()
 
-    # -------------------------------
-    # 4) SORT & LIMIT
-    # -------------------------------
-    qs = qs.order_by(
-        "-is_trending",
-        "discounted_price_annotated",
-        "-created_at"
-    )[:max_results]
+    qs = qs.order_by("-is_trending", "discounted_price", "-created_at")[:max_results]
 
-    # -------------------------------
-    # 5) FORMAT OUTPUT
-    # -------------------------------
-    products_data = []
+    # 4️⃣ FORMAT OUTPUT
+    results = []
     for p in qs:
-        try:
-            url = reverse("product_detail", args=[p.slug])
-        except:
-            url = "#"
-
-        # Lấy giá sau giảm
-        try:
-            price_val = float(p.discounted_price())
-        except:
-            price_val = float(p.orignal_price)
-
-        extra_info_qs = p.additional_informations.all()[:2]
-        extra_parts = []
-        for info in extra_info_qs:
-            if info.feature:
-                extra_parts.append(
-                    f"{info.feature}: {info.new_product_description or info.exisiting_product_description1}"
-                )
-        extra_text = " | ".join(extra_parts)
-
-        short_desc = p.product_description[:120] + "..." if p.product_description else ""
-        if extra_text:
-            short_desc = f"{short_desc} ({extra_text})"
-
-        products_data.append({
+        results.append({
             "name": p.product_name,
-            "price": price_val,
-            "short_desc": short_desc,
-            "url": url,
+            "price": float(p.discounted_price),
+            "short_desc": (p.product_description or "")[:120] + "...",
+            "url": reverse("product_detail", args=[p.slug]),
             "category": p.category.category,
             "brand": p.company.company,
             "image": p.product_image.url if p.product_image else "",
         })
 
-    return products_data
+    return results
 
 
+# ======================== AI CHAT ========================
 
-def build_products_context_text(products_data):
-    """
-    Chuyển danh sách sản phẩm sang text cho AI đọc.
-    """
-    if not products_data:
-        return "Hiện tại không tìm thấy sản phẩm nào phù hợp trong kho hàng."
-
-    lines = ["Dưới đây là một số sản phẩm trong kho E-Tech Shop phù hợp với yêu cầu khách hàng:"]
-
-    for i, p in enumerate(products_data, start=1):
-        price_str = f"{p['price']:,.0f} đ" if p["price"] else "Không rõ giá"
-        lines.append(
-            f"{i}. {p['name']} | Danh mục: {p['category']} | Hãng: {p['brand']} | "
-            f"Giá: {price_str} | Link: {p['url']} | Mô tả: {p['short_desc']}"
-        )
-    return "\n".join(lines)
-
-
-@csrf_exempt
 @csrf_exempt
 def ai_chat(request):
     if request.method != "POST":
         return JsonResponse({"error": "Only POST allowed"}, status=405)
 
     try:
-        data = json.loads(request.body.decode("utf-8"))
+        data = json.loads(request.body)
         user_message = data.get("message", "").strip()
 
         if not user_message:
             return JsonResponse({"error": "Message is empty"}, status=400)
 
-        # 1. Tìm sản phẩm từ DB (tối đa 3)
         products = search_products_for_message(user_message)
-        products_context = build_products_context_text(products)
 
-        # 2. Gửi lên OpenAI với prompt NGẮN GỌN HƠN
+        product_context = "\n".join(
+            f"{i+1}. {p['name']} | {p['brand']} | {p['price']:,.0f} đ | {p['short_desc']}"
+            for i, p in enumerate(products)
+        ) or "Không có sản phẩm phù hợp."
+
         response = client.chat.completions.create(
             model="gpt-4o-mini",
+            temperature=0.4,
             messages=[
                 {
                     "role": "system",
                     "content": (
-                        "Bạn là trợ lý bán hàng của website E-Tech Shop. "
-                        "Bạn được cung cấp DANH SÁCH SẢN PHẨM trong kho (kèm tên, giá, hãng, mô tả). "
-                        "Nhiệm vụ: chọn tối đa 3 sản phẩm phù hợp nhất với nhu cầu khách hàng "
-                        "và giải thích NGẮN GỌN.\n\n"
-                        "YÊU CẦU RẤT QUAN TRỌNG:\n"
-                        "- Luôn trả lời bằng TIẾNG VIỆT, thân thiện.\n"
-                        "- Không được đưa ra đường link / URL (vì hệ thống sẽ hiển thị thẻ sản phẩm riêng).\n"
-                        "- Không liệt kê cấu hình quá chi tiết (CPU, RAM, v.v.) trừ khi khách hỏi rõ.\n"
-                        "- Tổng câu trả lời nên dưới 4–5 câu.\n\n"
-                        "FORMAT TRẢ LỜI:\n"
-                        "Mở đầu 1 câu chào ngắn.\n"
-                        "Sau đó liệt kê dạng:\n"
-                        "1) TÊN SẢN PHẨM 1 – Giá khoảng X đ. Lý do gợi ý: ...\n"
-                        "2) TÊN SẢN PHẨM 2 – Giá khoảng Y đ. Lý do gợi ý: ...\n"
-                        "3) TÊN SẢN PHẨM 3 – Giá khoảng Z đ. Lý do gợi ý: ...\n"
-                        "\"\"\"\n"
-                        "Cuối cùng thêm 1 câu rủ khách bấm vào sản phẩm để xem chi tiết hoặc hỏi thêm."
-                    ),
+                        "Bạn là trợ lý bán hàng của E-Tech Shop.\n"
+                        "Luôn trả lời tiếng Việt, thân thiện.\n"
+                        "Không đưa link, không liệt kê cấu hình chi tiết.\n"
+                        "Tối đa 3 sản phẩm, tổng dưới 5 câu."
+                    )
                 },
                 {
                     "role": "system",
-                    "content": products_context,
+                    "content": f"DANH SÁCH SẢN PHẨM:\n{product_context}"
                 },
                 {
                     "role": "user",
-                    "content": user_message,
-                },
-            ],
-            temperature=0.4,
+                    "content": user_message
+                }
+            ]
         )
 
-        ai_reply = response.choices[0].message.content
-
-        return JsonResponse(
-            {
-                "reply": ai_reply,
-                "products": products,   # để JS vẽ card
-            }
-        )
+        return JsonResponse({
+            "reply": response.choices[0].message.content.strip(),
+            "products": products
+        })
 
     except Exception as e:
         print("AI_CHAT_ERROR:", e)
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": "AI system error"}, status=500)

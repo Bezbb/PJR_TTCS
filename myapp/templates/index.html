@@ -19,7 +19,15 @@
         <link href="{% static 'assets/css/theme/default.css' %}" id="theme" rel="stylesheet" />
         <link href="{% static 'assets/css/animate.min.css' %}" rel="stylesheet" />
         <link href="{% static 'assets/css/home.css' %}" rel="stylesheet" />
+        <link href="{% static 'assets/css/login.css' %}" rel="stylesheet" />
+        <link href="{% static 'assets/css/register.css' %}" rel="stylesheet" />
+        <link href="{% static 'assets/css/forget_password.css' %}" rel="stylesheet" />
+        <link href="{% static 'assets/css/change_password.css' %}" rel="stylesheet" />
         <link href="{% static 'assets/css/chatbox.css' %}" rel="stylesheet" />
+        <link href="{% static 'assets/css/product_detail.css' %}" rel="stylesheet" />
+        <link href="{% static 'assets/css/checkout_info.css' %}" rel="stylesheet" />
+        <link href="{% static 'assets/css/layout.css' %}" rel="stylesheet" />
+        <link href="{% static 'assets/css/product.css' %}" rel="stylesheet" />
 
 
         <!-- ================== END BASE CSS STYLE ================== -->
@@ -33,373 +41,300 @@
 
     {% endblock %}
 <body>
-     <!-- BEGIN #page-container -->
-     <div id="page-container" class="fade">
-        <!-- BEGIN #top-nav -->
-        <div id="top-nav" class="top-nav">
-            <!-- BEGIN container -->
-            <div class="container">
-                <div class="collapse navbar-collapse">
 
-                   
+<div id="page-container" class="fade">
+
+    <!-- ================= TOP NAV (GIỮ TRỐNG) ================= -->
+    <div id="top-nav" class="top-nav">
+        <div class="container"></div>
+    </div>
+
+    <!-- ================= HEADER ================= -->
+    <header id="header" class="header">
+        <div class="container">
+            <div class="header-container">
+
+                <!-- LOGO + MOBILE TOGGLE -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed"
+                            data-toggle="collapse"
+                            data-target="#navbar-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+
+                    <div class="header-logo">
+                        <a href="/">
+                            <span class="brand"></span>
+                            <strong>E-Tech</strong> Shop
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <!-- END container -->
-        </div>
-        <!-- END #top-nav -->
-        <div id="header" class="header">
-            <!-- BEGIN container -->
-            <div class="container">
-    <div class="header-container">
-        <!-- BEGIN navbar-header -->
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <div class="header-logo">
-                <a href="/">
-                    <span class="brand"></span>
-                    E-Tech Shop
-                </a>
-            </div>
-        </div>
-        <!-- END navbar-header -->
 
-        <!-- BEGIN header-nav -->
-        <div class="header-nav">
-    <div class="collapse navbar-collapse" id="navbar-collapse">
-        <ul class="nav">
+                <!-- MAIN NAV -->
+                <nav class="header-nav">
+                    <div class="collapse navbar-collapse" id="navbar-collapse">
+                        <ul class="nav">
 
-            <li class="active">
-                <a href="/">Trang chủ</a>
-            </li>
+                            <li class="active">
+                                <a href="/">Trang chủ</a>
+                            </li>
 
-            <!-- NÚT SẢN PHẨM MỚI THÊM -->
-            <li>
-                <a href="{% url 'product' %}">
-                    Sản phẩm
-                </a>
-            </li>
-            <!-- HẾT MỤC SẢN PHẨM -->
+                            <li>
+                                <a href="{% url 'product' %}">Sản phẩm</a>
+                            </li>
 
-            <li class="dropdown dropdown-full-width dropdown-hover">
-                <a href="#" data-toggle="dropdown">
-                    Danh mục
-                    <i class="fa fa-angle-down"></i>
-                    <span class="arrow top"></span>
-                </a>
+                            <!-- CATEGORY -->
+                            <li class="dropdown dropdown-full-width dropdown-hover">
+                                <a href="#" data-toggle="dropdown">
+                                    Danh mục
+                                    <i class="fa fa-angle-down"></i>
+                                </a>
 
-                <div class="dropdown-menu p-0">
-                    <div class="dropdown-menu-container">
+                                <div class="dropdown-menu p-0">
+                                    <div class="dropdown-menu-container">
 
-                        <div class="dropdown-menu-sidebar">
-                            <h4 class="title">Hãng</h4>
-                            <ul class="dropdown-menu-list">
-                                {% for c in categories %}
-                                <li>
-                                    <a href="{% url 'product_by_category' category_id=c.id %}">{{ c.category }}</a>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
+                                        <div class="dropdown-menu-sidebar">
+                                            <h4 class="title">Hãng</h4>
+                                            <ul class="dropdown-menu-list">
+                                                {% for c in categories %}
+                                                <li>
+                                                    <a href="{% url 'product_by_category' category_id=c.id %}">
+                                                        {{ c.category }}
+                                                    </a>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
 
-                        <div class="dropdown-menu-content">
-                            <h4 class="title">Sản phẩm nổi bật</h4>
+                                        <div class="dropdown-menu-content">
+                                            <h4 class="title">Sản phẩm nổi bật</h4>
+                                            <div class="row">
+                                                {% for item in shuffled_products %}
+                                                <div class="col-md-3">
+                                                    <ul class="dropdown-menu-list">
+                                                        <li>
+                                                            <a href="{% url 'product_detail' item.slug %}">
+                                                                <i class="fa fa-angle-right text-muted"></i>
+                                                                {{ item.product_name }}
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
 
-                            <div class="row">
-                                {% for item in shuffled_products %}
-                                <div class="col-md-3">
-                                    <ul class="dropdown-menu-list">
-                                        <li>
-                                            <a href="{% url 'product_detail' item.slug %}">
-                                                <i class="fa fa-fw fa-angle-right text-muted"></i> {{ item.product_name }}
+                                    </div>
+                                </div>
+                            </li>
+
+                            <!-- ABOUT -->
+                            <li class="dropdown dropdown-hover">
+                                <a href="#" data-toggle="dropdown">
+                                    Giới thiệu
+                                    <i class="fa fa-angle-down"></i>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="/about_us">Chính sách bảo hành</a></li>
+                                    <li><a href="/faq">Tư vấn mua hàng</a></li>
+                                </ul>
+                            </li>
+
+                            <!-- SEARCH -->
+                            <li class="dropdown dropdown-hover">
+                                <a href="#" data-toggle="dropdown">
+                                    <i class="fa fa-search search-btn"></i>
+                                </a>
+                                <div class="dropdown-menu p-15">
+                                    <form action="{% url 'home' %}" method="POST">
+                                        {% csrf_token %}
+                                        <div class="input-group">
+                                            <input type="text"
+                                                   name="search"
+                                                   placeholder="Tìm sản phẩm..."
+                                                   class="form-control bg-silver-lighter">
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-inverse">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </form>
+                                </div>
+                            </li>
+
+                        </ul>
+                    </div>
+                </nav>
+
+                <!-- RIGHT NAV -->
+                <nav class="header-nav">
+                    <ul class="nav pull-right">
+
+                        <!-- CART -->
+                        <li class="dropdown dropdown-hover">
+                            <a href="#" class="header-cart" data-toggle="dropdown">
+                                <i class="fa fa-shopping-bag"></i>
+                                <span class="total">{{ request.user.get_cart_count }}</span>
+                            </a>
+
+                            <div class="dropdown-menu dropdown-menu-cart p-0">
+                                <div class="cart-header">
+                                    <h4 class="cart-title">Giỏ hàng</h4>
+                                </div>
+
+                                <div class="cart-body">
+                                    {% if request.user.get_cart_count == 0 %}
+                                        <p class="text-center p-15">
+                                            Bạn chưa thêm sản phẩm nào
+                                        </p>
+                                    {% else %}
+                                        {% load humanize %}
+                                        {% for cart_items in request.user.user_carts.all %}
+                                        <ul class="cart-item">
+                                            <li>
+                                                <div class="cart-item-image">
+                                                    <img src="{{ cart_items.product.product_image.url }}">
+                                                </div>
+                                                <div class="cart-item-info">
+                                                    <h4>{{ cart_items.product.product_name }}</h4>
+                                                    <p class="price">
+                                                        {{ cart_items.product.discounted_price|intcomma }} đ
+                                                    </p>
+                                                </div>
+                                                <div class="cart-item-close">
+                                                    <a href="{% url 'remove_cart' cart_items.product.slug %}">&times;</a>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+
+                                <div class="cart-footer">
+                                    <div class="row row-space-10">
+                                        <div class="col-xs-6">
+                                            <a href="{% url 'add_to_cart' %}"
+                                               class="btn btn-default btn-block">
+                                                Xem giỏ
                                             </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </li>
-
-            <li class="dropdown dropdown-hover">
-                <a href="#" data-toggle="dropdown">
-                    Giới thiệu
-                    <i class="fa fa-angle-down"></i>
-                    <span class="arrow top"></span>
-                </a>
-
-                <ul class="dropdown-menu">
-                    <li><a href="/about_us">Chính sách bảo hành</a></li>
-                    <li><a href="/faq">Tư vấn mua hàng</a></li>
-                </ul>
-            </li>
-
-            <li class="dropdown dropdown-hover">
-                <a href="#" data-toggle="dropdown">
-                    <i class="fa fa-search search-btn"></i>
-                    <span class="arrow top"></span>
-                </a>
-
-                <div class="dropdown-menu p-15">
-                    <form action="{% url 'home' %}" method="POST">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            <input type="text" placeholder="Search" name="search" class="form-control bg-silver-lighter" />
-                            <span class="input-group-btn">
-                                <button class="btn btn-inverse" type="submit"><i class="fa fa-search"></i></button>
-                            </span>
-                        </div>
-                    </form>
-                </div> 
-            </li>
-
-        </ul>
-    </div>
-</div>
-
-        <!-- END header-nav -->
-
-        <!-- BEGIN header-nav -->
-        <div class="header-nav">
-            <ul class="nav pull-right">
-                <li class="dropdown dropdown-hover">
-                    <a href="" class="header-cart" data-toggle="dropdown">
-                        <i class="fa fa-shopping-bag"></i>
-                        <span class="total">{{ request.user.get_cart_count }}</span>
-                        <span class="arrow top"></span>
-                    </a>
-        
-                    <div class="dropdown-menu dropdown-menu-cart p-0">
-                        <div class="cart-header">
-                            <h4 class="cart-title">Giỏ hàng  </h4>
-                        </div>
-                        <div class="cart-body">
-                         
-                            {% if request.user.get_cart_count == 0 %}
-                            <h4 class="cart-title
-                            ">Bạn chưa thêm sản phẩm nào vào giỏ hàng</h4>
-                            {% else %}
-
-                            {% for cart_items in request.user.user_carts.all %}
-                           
-                            <ul class="cart-item">
-                                <li>
-                                    <div class="cart-item-image"><img src="{{cart_items.product.product_image.url}}" alt="" /></div>
-                                    {% load humanize %}
-                                    <div class="cart-item-info">
-                                        <h4>{{cart_items.product.product_name}}</h4>
-                                        <p class="price">{{cart_items.product.discounted_price|intcomma }}</p>
+                                        </div>
+                                        <div class="col-xs-6">
+                                            <a href="{% url 'product' %}"
+                                               class="btn btn-inverse btn-block">
+                                                Mua tiếp
+                                            </a>
+                                        </div>
                                     </div>
-                                   
-                                    <div class="cart-item-close">
-                                        <a href="{% url 'remove_cart' cart_items.product.slug %}" data-toggle="tooltip" data-title="Remove">&times;</a>
-                                    </div>
-
-                                </li>
-                             
-
-                            </ul>
-                            {% endfor %}
-
-                           
-                            {% endif %}
-                         
-
-                        </div>
-                                <!-- <li>
-                                    <div class="cart-item-image"><img src="{% static  'assets/img/imac.jpg' %}" alt="" /></div>
-                                    <div class="cart-item-info">
-                                        <h4>21.5-inch  </h4>
-                                        <p class="price">$1299.00</p>
-                                    </div>
-                                    <div class="cart-item-close">
-                                        <a href="#" data-toggle="tooltip" data-title="Remove">&times;</a>
-                                    </div>
-                                </li> -->
-
-                                <!-- <li>
-                                    <div class="cart-item-image"><img src="{% static 'assets/img/iphone.png' %}" alt="" /></div>
-                                    <div class="cart-item-info">
-                                        <h4>iPhone 6s 16GB - Silver</h4>
-                                        <p class="price">$649.00</p>
-                                    </div>
-                                    <div class="cart-item-close">
-                                        <a href="#" data-toggle="tooltip" data-title="Remove">&times;</a>
-                                    </div>
-                                </li> -->
-
-                           
-
-                        <div class="cart-footer">
-                            <div class="row row-space-10">
-                                <div class="col-xs-6">
-                                    <a href="{% url 'add_to_cart' %}" class="btn btn-default btn-block">Xem giỏ hàng</a>
-                                </div>
-
-                                <div class="col-xs-6">
-                                    <a href="{% url 'product' %}" class="btn btn-inverse btn-block">Tiếp tục mua sắm</a>
                                 </div>
                             </div>
-                        </div>
+                        </li>
 
-                    </div>
+                        <!-- ACCOUNT -->
+                        {% if request.user.is_authenticated %}
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{% url 'my_account' %}">
+                                Tài khoản của tôi
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'logout' %}">
+                                / Đăng xuất
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{% url 'login' %}">
+                                Đăng nhập / Đăng ký
+                            </a>
+                        </li>
+                        {% endif %}
 
-                </li>
+                    </ul>
+                </nav>
 
-                {% if request.user.is_authenticated %}
-     <li class="divider"></li>
-    <li>
-        <a href="{% url 'my_account' %}">
-            {% if request.user.user_profile %}
-                <img src="{{ MEDIA_URL }}{{ request.user.user_profile.url }}" class="user-img" alt="{{ request.user.first_name }}" />
-            {% else %}
-                <img src="{% static 'user_profile/default.webp' %}" class="user-img" alt="Default Profile Image" />
-            {% endif %}
-            <span class="hidden-xs">Tài khoản của tôi</span>
-        </a>
-    </li>
-    <li>
-        <a href="{% url 'logout' %}">
-            <span class="hidden-xs">/Đăng xuất</span>
-        </a>
-    </li>
-{% else %}
-    <li class="divider"></li>
-    <li>
-        <a href="{% url 'login' %}">
-            <span class="hidden-xs">Đăng nhập / Đăng ký</span>
-        </a>
-    </li>
-{% endif %}
-</ul>
+            </div>
         </div>
-        <!-- END header-nav -->
+    </header>
+    <!-- ================= END HEADER ================= -->
+
+    {% block content %}{% endblock %}
+
+    <!-- ================= POLICY ================= -->
+    <section id="policy" class="section-container p-t-30 p-b-30">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-md-4 col-sm-4">
+                    <div class="policy">
+                        <div class="policy-icon"><i class="fa fa-truck"></i></div>
+                        <div class="policy-info">
+                            <h4>Miễn phí giao hàng</h4>
+                            <p>Toàn quốc – Nhanh – An toàn</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-4">
+                    <div class="policy">
+                        <div class="policy-icon"><i class="fa fa-shield"></i></div>
+                        <div class="policy-info">
+                            <h4>Bảo hành 1 năm</h4>
+                            <p>Chính hãng – Đổi trả dễ dàng</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-4">
+                    <div class="policy">
+                        <div class="policy-icon"><i class="fa fa-user-md"></i></div>
+                        <div class="policy-info">
+                            <h4>Hỗ trợ kỹ thuật</h4>
+                            <p>Tận tâm – Nhanh chóng</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+    <footer id="footer" class="footer">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-md-4">
+                    <h4 class="footer-header">Về E-Tech</h4>
+                    <p>
+                        Chuyên cung cấp laptop, điện thoại và phụ kiện chính hãng,
+                        mang đến trải nghiệm mua sắm hiện đại & an toàn.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </footer>
+
+    <div id="footer-copyright">
+        <div class="container">
+            <div class="payment-method">
+                <img src="{% static 'assets/img/payment_method.png' %}">
+            </div>
+            <div class="copyright">
+                © E-Tech Shop – Thanh toán đa dạng
+            </div>
+        </div>
     </div>
-    <!-- END header-container -->
-</div>
-<!-- END container -->
-</div>
-<!-- END #header -->
 
-{% block content %}
-
-
-{% endblock %}
-
-        <!-- BEGIN #policy -->
-        <div id="policy" class="section-container p-t-30 p-b-30">
-            <!-- BEGIN container -->
-            <div class="container">
-                <!-- BEGIN row -->
-                <div class="row">
-                    <!-- BEGIN col-4 -->
-                    <div class="col-md-4 col-sm-4">
-                        <!-- BEGIN policy -->
-                        <div class="policy">
-                            <div class="policy-icon"><i class="fa fa-truck"></i></div>
-                            <div class="policy-info">
-                                <h4>Miễn phí giao hàng trên toàn quốc</h4>
-                                <p>Nhanh chóng – An toàn – Tận nơi trên toàn quốc.</p>
-                            </div>
-                        </div>
-                        <!-- END policy -->
-                    </div>
-                    <!-- END col-4 -->
-                    <!-- BEGIN col-4 -->
-                    <div class="col-md-4 col-sm-4">
-                        <!-- BEGIN policy -->
-                        <div class="policy">
-                            <div class="policy-icon"><i class="fa fa-shield"></i></div>
-                            <div class="policy-info">
-                                <h4>>Bảo hành 1 năm cho điện thoại</h4>
-                                <p>An tâm sử dụng – Chính hãng 100% – Đổi trả dễ dàng.</p>
-                            </div>
-                        </div>
-                        <!-- END policy -->
-                    </div>
-                    <!-- END col-4 -->
-                    <!-- BEGIN col-4 -->
-                    <div class="col-md-4 col-sm-4">
-                        <!-- BEGIN policy -->
-                        <div class="policy">
-                            <div class="policy-icon"><i class="fa fa-user-md"></i></div>
-                            <div class="policy-info">
-                                <h4>Bảo hành 6 tháng cho phụ kiện</h4>
-                                <p>Sản phẩm chính hãng – Đổi mới nếu lỗi từ nhà sản xuất</p>
-                            </div>
-                        </div>
-                        <!-- END policy -->
-                    </div>
-                    <!-- END col-4 -->
-                </div>
-                <!-- END row -->
-            </div>
-            <!-- END container -->
-        </div>
-        <!-- END #policy -->
-    
-        <!-- BEGIN #subscribe -->
-    
-        <!-- BEGIN #footer -->
-        <div id="footer" class="footer">
-            <!-- BEGIN container -->
-            <div class="container">
-                <!-- BEGIN row -->
-                <div class="row">
-                    <!-- BEGIN col-3 -->
-                    <div class="col-md-3">
-                        <h4 class="footer-header">Về chúng tôi</h4>
-                        <p>
-                            Chúng tôi là <strong>E-Tech</strong> — một nhóm đam mê công nghệ, chuyên cung cấp laptop, điện thoại và phụ kiện chính hãng.  
-                            Với sứ mệnh mang đến trải nghiệm mua sắm hiện đại, an toàn và tiện lợi nhất cho khách hàng.
-                        </p>
-                    </div>
-                    <!-- END col-3 -->
-                    <!-- BEGIN col-3 -->
-                
-                    <!-- END col-3 -->
-
-                  <!-- BEGIN col-3 -->
-
-        <div class="col-md-3">
-
-    <ul class="list-unstyled list-product">
-
-        {% for item in latest_products %}
-       
-        {% endfor %}
-    </ul>
 </div>
 
-                </div>
-                <!-- END row -->
-            </div>
-            <!-- END container -->
-        </div>
-        <!-- END #footer -->
-    
-        <!-- BEGIN #footer-copyright -->
-        <div id="footer-copyright" class="footer-copyright">
-            <!-- BEGIN container -->
-            <div class="container">
-                <div class="payment-method">
-                    <img src="{% static 'assets/img/payment_method.png' %}" alt="" />
-                </div>
-                <div class="copyright">
-                    Chấp nhận thanh toán qua nhiều loại thẻ
-                </div>
-            </div>
-            <!-- END container -->
-        </div>
-        <!-- END #footer-copyright -->
-    </div>
-    <!-- END #page-container -->
+</body>
+
     
 	
 	<!-- ================== BEGIN BASE JS ================== -->

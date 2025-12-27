@@ -2,42 +2,56 @@
 
 .chatbox-open-btn {
     position: fixed;
-    bottom: 25px;
-    right: 25px;
-    background: #348fe2;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4a90e2, #357abd);
     color: #fff;
     border: none;
-    width: 55px;
-    height: 55px;
-    border-radius: 50%;
     font-size: 22px;
     cursor: pointer;
     z-index: 9999;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
+.chatbox-open-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 26px rgba(0,0,0,0.3);
+}
+
+/* ======================= CONTAINER ======================= */
 
 .ai-chatbox {
     position: fixed;
     bottom: 90px;
-    right: 25px;
-    width: 340px;
-    height: 450px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    right: 24px;
+    width: 360px;
+    height: 480px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.35);
     display: none;
     flex-direction: column;
     z-index: 9999;
+    overflow: hidden;
 }
 
+/* ======================= HEADER ======================= */
+
 .ai-chat-header {
-    padding: 10px;
-    background: #242a30;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, #242a30, #1b1f24);
     color: #fff;
-    border-radius: 12px 12px 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.ai-chat-header strong {
+    font-size: 14px;
 }
 
 .chatbox-toggle {
@@ -48,115 +62,136 @@
     cursor: pointer;
 }
 
+/* ======================= MESSAGES ======================= */
+
 .ai-chat-messages {
     flex: 1;
-    padding: 10px;
+    padding: 12px;
     overflow-y: auto;
-    background: #f5f5f5;
+    background: #f2f4f8;
+    scroll-behavior: smooth;
 }
 
-/* ===== Bubble ===== */
+/* ======================= BUBBLES ======================= */
 
 .ai-msg {
     margin-bottom: 10px;
-    clear: both;            /* mỗi bubble tự clear để không đè nhau */
+    clear: both;
 }
 
 .ai-msg span {
-    padding: 8px 12px;
-    border-radius: 12px;
+    padding: 9px 14px;
+    border-radius: 14px;
     display: inline-block;
-    max-width: 80%;
+    max-width: 78%;
+    font-size: 13px;
+    line-height: 1.45;
+    word-wrap: break-word;
 }
 
+/* User */
 .ai-msg.user span {
-    background: #348fe2;
+    background: linear-gradient(135deg, #4a90e2, #357abd);
     color: #fff;
     float: right;
-    border-radius: 12px 12px 0 12px;
+    border-radius: 14px 14px 0 14px;
 }
 
+/* Bot */
 .ai-msg.bot span {
-    background: #fff;
-    border: 1px solid #ddd;
+    background: #ffffff;
+    color: #333;
     float: left;
-    border-radius: 12px 12px 12px 0;
+    border-radius: 14px 14px 14px 0;
+    border: 1px solid #e2e5ea;
 }
 
-/* ===== Input ===== */
+/* ======================= INPUT ======================= */
 
 .ai-chat-input {
-    padding: 8px;
+    padding: 10px;
     display: flex;
-    border-top: 1px solid #ddd;
-    background: #fff;
+    gap: 8px;
+    border-top: 1px solid #e5e7eb;
+    background: #ffffff;
 }
 
 .ai-chat-input input {
     flex: 1;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
     outline: none;
+    font-size: 13px;
+}
+
+.ai-chat-input input:focus {
+    border-color: #4a90e2;
 }
 
 .ai-chat-input button {
-    margin-left: 8px;
-    padding: 8px 14px;
-    background: #348fe2;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #4a90e2, #357abd);
     border: none;
     color: #fff;
-    border-radius: 6px;
+    border-radius: 10px;
+    font-size: 13px;
     cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.ai-chat-input button:hover {
+    background: linear-gradient(135deg, #5aa0f2, #3f85d0);
 }
 
 /* ================== PRODUCT CARDS ================== */
 
 .chat-product-suggestions {
-    clear: both;                /* 🔥 rất quan trọng: nằm dưới bubble */
-    margin-top: 8px;
+    clear: both;
+    margin-top: 6px;
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-/* Card nhỏ gọn */
+/* Card */
 .chat-product-card {
     display: flex;
     align-items: center;
     gap: 10px;
 
     background: #ffffff;
-    border-radius: 10px;
-    padding: 8px 10px;
+    border-radius: 12px;
+    padding: 10px 12px;
     text-decoration: none;
 
-    border: 1px solid #e5e5e5;
-    max-width: 260px;
+    border: 1px solid #e5e7eb;
+    max-width: 280px;
     width: 100%;
 
-    transition: 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .chat-product-card:hover {
-    background: #f2f8ff;
+    background: #f0f6ff;
     border-color: #4a90e2;
+    transform: translateY(-1px);
 }
 
-/* Ảnh sản phẩm */
+/* Image */
 .chat-product-image {
-    width: 60px;
-    height: 60px;
+    width: 58px;
+    height: 58px;
     object-fit: contain;
-    border-radius: 6px;
-    background: #f7f7f7;
+    border-radius: 8px;
+    background: #f7f8fa;
 }
 
 /* Text */
 .chat-product-name {
     font-size: 13px;
     font-weight: 600;
-    color: #333;
+    color: #1f2937;
     line-height: 1.3;
 }
 
@@ -164,7 +199,16 @@
     font-size: 12px;
     font-weight: 700;
     color: #0b9444;
-    margin-top: 3px;
+    margin-top: 4px;
 }
 
-/* =================================================== */
+/* ======================= MOBILE ======================= */
+
+@media (max-width: 480px) {
+    .ai-chatbox {
+        right: 10px;
+        width: calc(100% - 20px);
+        height: 90vh;
+        bottom: 10px;
+    }
+}
